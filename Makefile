@@ -1,8 +1,8 @@
 LIBS = -lpopt 
-# DEBUG = -g3 -pg -fprofile-arcs
-DEBUG = 
+DEBUG = -g3 -pg -fprofile-arcs
+#DEBUG = 
 
-PROG_OBJ = prog1.o at89ser.o pins.o
+PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o
 
 all: at89prog
 doc: at89prog.pdf

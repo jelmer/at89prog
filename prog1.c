@@ -30,6 +30,7 @@ void usage(poptContext pc)
 void quit(int s)
 {
 	deactivate();
+	ClosePinBackend();
 	fprintf(stderr, "Received signal, exiting...\n");
 	exit(0);
 }
@@ -133,13 +134,52 @@ int writehex(FILE *fd, char do_verify, char datamem)
 }
 
 
+int read_pin_configuration(char *name)
+{
+	char bit[10], pin[10];
+	int line = 0;
+	FILE *fd = fopen(name, "r");
+
+	if(!fd) { 
+		fprintf(stderr, "Can't open %s!\n", name);
+		perror("fopen"); 
+		return 1; 
+	}
+
+	while(!feof(fd)) 
+	{
+		line++;
+		if(fscanf(fd, "%4s %6s\n", bit, pin) < 2) {
+			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
+			continue;
+		}
+
+		switch(SetPinVariable(bit, pin)) {
+		case -1: 
+			fprintf(stderr, "Invalid configuration variable '%s' at line %d in %s, ignoring\n", bit, line, name);
+			continue;
+
+		case -2:
+			fprintf(stderr, "Invalid value '%s' for configuration variable '%s' at line %d in %s, ignoring\n", pin, bit, line, name);
+			continue;
+
+		default:
+			break;
+		}
+	}
+	
+	fclose(fd);
+	return 0;
+}
+
 int main(int argc, const char **argv) 
 {
 	int datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
 	FILE *fd;
-	int newserport = -1;
 	char *format = "auto";
 	char *rcfile = NULL;
+	char *type = "serial";
+	char *port = NULL;
 	char c, print_usage = 1;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
@@ -149,7 +189,8 @@ int main(int argc, const char **argv)
 		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
 		{ "progress", 'P', POPT_ARG_NONE, &progress, 0, "Print progress dots" },
 		{ "verify", 'V', POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
-		{ "port", 'p', POPT_ARG_STRING, NULL, 'p', "Address of serial port to use [3f8]" },
+		{ "type", 't', POPT_ARG_STRING, &type, 't', "Type of port to use (serial or serial-raw)" },
+		{ "port", 'p', POPT_ARG_STRING, &port, 'p', "Location of port to use" },
 		{ "rcfile", 'r', POPT_ARG_STRING, &rcfile, 0, "Use rc file from specified location" },
 		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
 		POPT_TABLEEND
@@ -160,34 +201,19 @@ int main(int argc, const char **argv)
 	pc = poptGetContext(NULL, argc, argv, long_options, POPT_CONTEXT_KEEP_FIRST);
 	poptSetOtherOptionHelp(pc, "command [file-to-write]");
 
-	while ((c = poptGetNextOpt(pc)) != -1) {
-		switch(c) {
-			case 'p': newserport = strtol(poptGetOptArg(pc), NULL, 16); break;
-				}
-	}
+	while ((c = poptGetNextOpt(pc)) != -1) { }
 
 	if(!rcfile) { 
 		rcfile = malloc(strlen(getenv("HOME")) + 20);
 		snprintf(rcfile, strlen(getenv("HOME")) + 20, "%s/.at89progrc", getenv("HOME")); 
 	}
 	
+	if(LoadPinBackend(type) != 0) return 1;
+	if(port)SetPinVariable(NULL, port);
+	if(BackendInit() != 0) return 1;
+	
 	if(rcfile) {
-		if(readrcfile(rcfile) != 0) return 1;
-	}
-
-	if(newserport != -1)serport = newserport;
-
-	if(ioperm(serport, 7, 1) == -1) 
-	{
-		perror("ioperm");
-		fprintf(stderr, "Run at89prog with IO port access\n");
-		return 1;
-	}
-
-	if(ioperm(0x80, 1, 1) == -1) 
-	{
-		perror("ioperm");
-		return 1;
+		if(read_pin_configuration(rcfile) != 0) return 1;
 	}
 
 	signal(SIGINT, quit);

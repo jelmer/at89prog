@@ -1,17 +1,31 @@
 #ifndef __PINS_H__
 #define __PINS_H__
 
-extern int serport;
+int readrcfile(char *name); 
 
-void SetSCK();
-void ClearSCK();
+struct pins_backend { 
+	char *name;
+	char **available_pins;
+	int (*init)(char *loc);
+	void (*set) (int);
+	void (*clear) (int);
+	int (*get) (int);
+	int (*close) ();
+	int (*config)(char *name, char *value);
+};
+
+int BackendInit();
+
 void SetMOSI();
 void ClearMOSI();
-int GetMISO();
 void SetRST();
 void ClearRST();
+void SetSCK();
+void ClearSCK();
+int ClosePinBackend();
 int GetCHK();
-
-int readrcfile(char *name); 
+int GetMISO();
+int SetPinVariable(char *name, char *Value);
+int LoadPinBackend(char *name);
 
 #endif
