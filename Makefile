@@ -8,7 +8,7 @@ COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-para
 PROG_OBJ = at89prog.o $(COMMON_OBJ)
 GTKPROG_OBJ = at89prog-gtk.o $(COMMON_OBJ)
 
-all: at89prog 
+all: at89prog check-gtk
 doc: at89prog.pdf
 
 install: all doc
@@ -28,7 +28,7 @@ at89prog: $(PROG_OBJ)
 
 # Only build Gtk version if GTK and GLib were found
 check-gtk:
-	pkg-config --exists gtk+-2.0 glib-2.0 2>/dev/null > /dev/null && $(MAKE) at89prog-gtk
+	-pkg-config --exists gtk+-2.0 glib-2.0 gtkhex 2>/dev/null > /dev/null && $(MAKE) at89prog-gtk
 
 at89prog-gtk: $(GTKPROG_OBJ)
 	$(CC) $(DEBUG) -Wall -O -o $@ $(GTKPROG_OBJ) $(LIBS) $(GTK_LIBS)

@@ -243,6 +243,7 @@ int main(int argc, const char **argv)
 			else if(verbose)fprintf(stderr, "File %s programmed with %d errors\n", filename, errors);
 			fclose(fd);
 		}
+		if(dump)putchar('\n');
 	} else if(!strcmp(poptPeekArg(pc), "readfile")) {
 		int len, i;
 		programming();
@@ -306,6 +307,7 @@ int main(int argc, const char **argv)
 
 		if(datamem) printf("%x\n", readdata(address));
 		else printf("%x\n", readcode(address));
+		if(dump)putchar('\n');
 	} else if(!strcmp(poptPeekArg(pc), "version")) {
 		  fprintf(stderr, "at89prog - a AT89S8252 programmer using SPI\n");
 		  fprintf(stderr, " Version "VERSION"\n");
