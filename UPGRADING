@@ -1,0 +1,14 @@
+Information for users upgrading from pre-0.7 to 0.7
+===================================================
+Serial port access is no longer 'direct' - instead of 
+directly communicating with the hardware (which requires 
+root access and only works with standard hardware), the 
+serial port interface is now used.
+
+The port type 'serial-raw' provides backwards compatibility 
+for those still needing it. The new 'serial' port type (which 
+is the default port type, works similar to 'serial-raw', except 
+that it requires a filename instead of a base address. (e.g. 
+not 2f8 but /dev/ttyS0)
+
+ -- Jelmer Vernooij <jelmer@samba.org>, 24 February 2004.
