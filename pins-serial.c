@@ -70,7 +70,7 @@ static void ser_set(int p)
 	
 	switch(p) {
 	case SER_PIN_TXD: 
-		if(ioctl (fd, TIOCCBRK, 0) < 0) perror("ioctl");
+		if(ioctl (fd, TIOCSBRK, 0) < 0) perror("ioctl");
 		break;
 	case SER_PIN_DTR: status |= TIOCM_DTR; break;
 	case SER_PIN_DSR: status |= TIOCM_LE; break;
@@ -91,7 +91,7 @@ static void ser_clear(int p)
 	
 	switch(p) {
 	case SER_PIN_TXD: 
-		if(ioctl (fd, TIOCSBRK, 0) < 0) perror("ioctl"); 
+		if(ioctl (fd, TIOCCBRK, 0) < 0) perror("ioctl"); 
 		  break;
 	case SER_PIN_DTR: status &=~TIOCM_DTR; break;
 	case SER_PIN_DSR: status &=~TIOCM_LE; break;

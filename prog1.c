@@ -29,7 +29,7 @@
 #include "at89ser.h"
 #include "delays.h"
 
-#define VERSION		"0.6"
+#define VERSION		"0.7"
 
 char progress = 0;
 

@@ -40,7 +40,7 @@ static int serport = 0x3f8;
 
 static struct bit bits[] = {
 	{ 4, 0x02, 0}, /* RTS */
-	{ 3, 0x40, 1}, /* TXD */
+	{ 3, 0x40, 0}, /* TXD */
 	{ 6, 0x10, 1}, /* CTS */
 	{ 6, 0x20, 0}, /* DSR */
 	{ 4, 0x01, 0},  /* DTR */

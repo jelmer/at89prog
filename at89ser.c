@@ -34,8 +34,8 @@ void SPI_Out(int b)
 {
 	int i;
 	for(i = 7; i >= 0; i--) {
-		if(b & (1 << i)) SetMOSI();
-		else ClearMOSI();
+		if(b & (1 << i)) ClearMOSI();
+		else SetMOSI();
 		waitmicrosec(2);
 		SetSCK();
 		waitmicrosec(3);
@@ -111,7 +111,7 @@ int activate()
 {
 	deactivate();
 	ClearSCK();
-	ClearMOSI();
+	SetMOSI();
 	SetRST();
 	waitmillisec(12);
 	

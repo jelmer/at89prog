@@ -1,1 +1,0 @@
-- fixes for pins (The TXD set function now sets it to negative, instead of positive), same goes for the CTS pin

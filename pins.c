@@ -169,7 +169,15 @@ int pins_init()
 	int i;
 	if(!backend) backend = pins_backends[0];
 	for(i = 0; i < num_confsettings; i++) {
-		SetPinVariable(confsettings[i].name, confsettings[i].value);
+		switch(SetPinVariable(confsettings[i].name, confsettings[i].value)) {
+		case 0:break;
+		case -1:
+			   fprintf(stderr, "Unknown PIN '%s'\n", confsettings[i].name);
+			   return -1;
+		case -2:
+			   fprintf(stderr, "Unknown PIN '%s'\n", confsettings[i].value);
+			   return -1;
+		}
 	}
 
 	return backend->init(location);
