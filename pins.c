@@ -44,8 +44,8 @@ int pin_reverse[5] = { 0, 0, 0, 0, 0 };
 static struct pins_backend *backend = NULL;
 extern struct pins_backend serial_raw, serial, parallel;
 static struct pins_backend *pins_backends[] = {
-	&serial_raw,
 	&serial,
+	&serial_raw,
 	&parallel,
 	NULL
 };
