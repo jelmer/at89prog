@@ -15,6 +15,7 @@
 #include "hexfile.h"
 
 char *buffer = NULL;
+char *rcfile;
 size_t bufferlen = 0;
 GtkWidget* create_aboutwin (void);
 GtkWidget* create_settingswin (void);
@@ -22,6 +23,24 @@ GtkWidget* create_settingswin (void);
 void update_hex_field() 
 {
 	/* FIXME */
+}
+
+void load_hex_file(const char *file)
+{
+	FILE *fd = fopen(file, "r");
+	if(buffer)g_free(buffer);
+	bufferlen = 0; buffer = NULL;
+	/* FIXME */
+	fclose(fd);
+	update_hex_field();
+}
+
+void save_hex_file(const char *file)
+{
+	FILE *fd = fopen(file, "w+");
+	/*FIXME*/
+
+	fclose(fd);
 }
 
 void
@@ -37,7 +56,6 @@ void
 on_open_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	int firstchar = 0;
 	GtkWidget *ok_button;
 	GtkWidget *cancel_button;
 	GtkWidget *openfilewin = gtk_file_selection_new ("Select File");
@@ -55,8 +73,7 @@ on_open_activate                      (GtkMenuItem     *menuitem,
 	result = gtk_dialog_run(GTK_DIALOG(openfilewin));
 	switch(result) {
 	case GTK_RESPONSE_OK:
-		/* FIXME */
-		
+		load_hex_file(gtk_file_selection_get_filename(GTK_FILE_SELECTION(openfilewin)));
 		break;
 
 	default:
@@ -87,7 +104,7 @@ on_save_as_activate                   (GtkMenuItem     *menuitem,
 	result = gtk_dialog_run(GTK_DIALOG(savefilewin));
 	switch(result) {
 	case GTK_RESPONSE_OK:
-		/* FIXME */
+		save_hex_file(gtk_file_selection_get_filename(GTK_FILE_SELECTION(savefilewin)));
 		break;
 
 	default:
@@ -125,16 +142,12 @@ on_settings_activate                  (GtkMenuItem     *menuitem,
 }
 
 
-void
-on_reset_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_reset_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	deactivate();
 }
 
-void
-on_erase_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_erase_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	programming();
 	erase();
@@ -142,33 +155,25 @@ on_erase_activate                     (GtkMenuItem     *menuitem,
 }
 
 
-void
-on_download_data_memory_activate               (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_download_data_memory_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	/*FIXME*/
 }
 
 
-void
-on_download_code_memory_activate               (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_download_code_memory_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	/*FIXME*/
 }
 
 
-void
-on_upload_data_memory_activate               (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_upload_data_memory_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	/*FIXME*/
 }
 
 
-void
-on_upload_code_memory_activate               (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_upload_code_memory_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	/*FIXME*/
 }
@@ -183,6 +188,24 @@ on_about_activate                     (GtkMenuItem     *menuitem,
     gtk_widget_destroy(aboutwin);
 }
 
+void
+hex_cell_data_func (GtkTreeViewColumn *col,
+                    GtkCellRenderer   *renderer,
+                    GtkTreeModel      *model,
+                    GtkTreeIter       *iter,
+                    gpointer           user_data)
+{
+	int num = GPOINTER_TO_INT(user_data);
+	int hexnum;
+	char buf[64];
+
+	gtk_tree_model_get(model, iter, num, &hexnum, -1);
+
+	g_snprintf(buf, sizeof(buf), "%02x", hexnum);
+
+	g_object_set(renderer, "text", buf, NULL);
+}
+
 
 GtkWidget* create_mainwin (void)
 {
@@ -193,11 +216,10 @@ GtkWidget* create_mainwin (void)
   GtkWidget *menuitem4_menu;
   GtkWidget *new;
   GtkWidget *open;
+  GtkWidget *scrolledwindow1;
   GtkWidget *save_as;
   GtkWidget *separatormenuitem1;
   GtkWidget *quit;
-  GtkWidget *menuitem5;
-  GtkWidget *menuitem5_menu;
   GtkWidget *device;
   GtkWidget *device_menu;
   GtkWidget *settings;
@@ -217,8 +239,10 @@ GtkWidget* create_mainwin (void)
   GtkWidget *about;
   GtkWidget *statusbar;
   GtkWidget *hexview;
+  GtkCellRenderer *hexrenderer;
   GtkListStore *hexstore;
   GtkAccelGroup *accel_group;
+  GtkTreeViewColumn *curcol;
 
   accel_group = gtk_accel_group_new ();
 
@@ -252,12 +276,6 @@ GtkWidget* create_mainwin (void)
 
   quit = gtk_image_menu_item_new_from_stock ("gtk-quit", accel_group);
   gtk_container_add (GTK_CONTAINER (menuitem4_menu), quit);
-
-  menuitem5 = gtk_menu_item_new_with_mnemonic ("_Edit");
-  gtk_container_add (GTK_CONTAINER (menubar), menuitem5);
-
-  menuitem5_menu = gtk_menu_new ();
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem5), menuitem5_menu);
 
   device = gtk_menu_item_new_with_mnemonic ("_Device");
   gtk_container_add (GTK_CONTAINER (menubar), device);
@@ -318,6 +336,10 @@ GtkWidget* create_mainwin (void)
   about = gtk_menu_item_new_with_mnemonic ("_About");
   gtk_container_add (GTK_CONTAINER (menuitem7_menu), about);
 
+  scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow1);
+  gtk_box_pack_start (GTK_BOX (vbox1), scrolledwindow1, TRUE, TRUE, 0);
+
   hexview = gtk_tree_view_new();
   hexstore = gtk_list_store_new(17, G_TYPE_LONG, 
 					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR,
@@ -325,7 +347,23 @@ GtkWidget* create_mainwin (void)
 					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR,
 					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR);
   gtk_tree_view_set_model(GTK_TREE_VIEW(hexview), GTK_TREE_MODEL(hexstore));
-  gtk_box_pack_start(GTK_BOX(vbox1), hexview, FALSE, FALSE, 0);
+  curcol = gtk_tree_view_column_new();
+  hexrenderer = gtk_cell_renderer_text_new();
+  gtk_tree_view_append_column(GTK_TREE_VIEW(hexview), curcol);
+  gtk_tree_view_column_pack_start(curcol, hexrenderer, TRUE);
+  gtk_tree_view_column_add_attribute(curcol, hexrenderer, "text", 0);
+  gtk_tree_view_column_set_cell_data_func(curcol, hexrenderer, hex_cell_data_func, GINT_TO_POINTER(0), NULL);
+  {
+	  int i;
+	  for(i = 1; i <= 16; i++) {
+	  	curcol = gtk_tree_view_column_new();
+  		hexrenderer = gtk_cell_renderer_text_new();
+  		gtk_tree_view_append_column(GTK_TREE_VIEW(hexview), curcol);
+		gtk_tree_view_column_pack_start(curcol, hexrenderer, TRUE);
+  		gtk_tree_view_column_add_attribute(curcol, hexrenderer, "text", i);
+		gtk_tree_view_column_set_cell_data_func(curcol, hexrenderer, hex_cell_data_func, GINT_TO_POINTER(i), NULL);
+	  }
+  }
   
   statusbar = gtk_statusbar_new ();
   gtk_box_pack_start (GTK_BOX (vbox1), statusbar, FALSE, FALSE, 0);
@@ -351,7 +389,6 @@ GtkWidget* create_mainwin (void)
   g_signal_connect ((gpointer) erase, "activate",
                     G_CALLBACK (on_erase_activate),
                     NULL);
-
   g_signal_connect ((gpointer) download_data_memory, "activate",
                     G_CALLBACK (on_download_data_memory_activate),
                     NULL);
@@ -608,6 +645,9 @@ int main (int argc, char *argv[])
   GtkWidget *mainwin;
 
   gtk_init (&argc, &argv);
+
+  rcfile = g_strdup_printf("%s/.at89progrc", g_get_home_dir());
+  pins_read_config_file(rcfile);
 
   mainwin = create_mainwin ();
   gtk_widget_show_all(mainwin);
