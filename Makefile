@@ -2,7 +2,7 @@ LIBS = -lpopt
 DEBUG = -g3 #-pg -fprofile-arcs
 #DEBUG = 
 
-PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o
+PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o
 DELAYTEST_OBJ = delaytest.o delays.o
 
 all: at89prog
