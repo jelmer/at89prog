@@ -92,7 +92,11 @@ int readrcfile(char *name)
 	int line = 0;
 	FILE *fd = fopen(name, "r");
 
-	if(!fd) { perror("fopen"); return 1; }
+	if(!fd) { 
+		fprintf(stderr, "Can't open %s!\n", name);
+		perror("fopen"); 
+		return 1; 
+	}
 
 	while(!feof(fd)) 
 	{

@@ -9,7 +9,7 @@
 #include "pins.h"
 #include "at89ser.h"
 
-#define VERSION		"0.5.1"
+#define VERSION		"0.6"
 
 char progress = 0;
 
