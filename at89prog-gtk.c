@@ -421,9 +421,9 @@ GtkWidget* create_settingswin (void)
   GtkWidget *label2;
   GtkWidget *label3;
   GtkWidget *settings_combo_port_type;
-  GtkWidget *combo_entry1;
+  GtkWidget *settings_combo_port_type_entry;
   GtkWidget *settings_combo_port_location;
-  GtkWidget *combo_entry2;
+  GtkWidget *settings_combo_port_location_entry;
   GtkWidget *label1;
   GtkWidget *frame2;
   GtkWidget *table2;
@@ -432,16 +432,16 @@ GtkWidget* create_settingswin (void)
   GtkWidget *label7;
   GtkWidget *label8;
   GtkWidget *label9;
-  GtkWidget *combo3;
-  GtkWidget *combo_entry3;
-  GtkWidget *combo4;
-  GtkWidget *combo_entry4;
-  GtkWidget *combo5;
-  GtkWidget *combo_entry5;
-  GtkWidget *combo6;
-  GtkWidget *combo_entry6;
-  GtkWidget *combo7;
-  GtkWidget *combo_entry7;
+  GtkWidget *settings_combo_mosi;
+  GtkWidget *settings_combo_mosi_entry;
+  GtkWidget *settings_combo_miso;
+  GtkWidget *settings_combo_miso_entry;
+  GtkWidget *settings_combo_rst;
+  GtkWidget *settings_combo_rst_entry;
+  GtkWidget *settings_combo_chk;
+  GtkWidget *settings_combo_chk_entry;
+  GtkWidget *settings_combo_sck;
+  GtkWidget *settings_combo_sck_entry;
   GtkWidget *label4;
   GtkWidget *dialog_action_area1;
   GtkWidget *cancelbutton1;
@@ -481,7 +481,7 @@ GtkWidget* create_settingswin (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry1 = GTK_COMBO (settings_combo_port_type)->entry;
+  settings_combo_port_type_entry = GTK_COMBO (settings_combo_port_type)->entry;
 
   settings_combo_port_location = gtk_combo_new ();
   g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_port_location)->popwin),
@@ -490,7 +490,7 @@ GtkWidget* create_settingswin (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry2 = GTK_COMBO (settings_combo_port_location)->entry;
+  settings_combo_port_location_entry = GTK_COMBO (settings_combo_port_location)->entry;
 
   label1 = gtk_label_new ("Port");
   gtk_frame_set_label_widget (GTK_FRAME (frame1), label1);
@@ -531,50 +531,50 @@ GtkWidget* create_settingswin (void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label9), 0, 0.5);
 
-  combo3 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo3)->popwin),
-                     "GladeParentKey", combo3);
-  gtk_table_attach (GTK_TABLE (table2), combo3, 1, 2, 0, 1,
+  settings_combo_mosi = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_mosi)->popwin),
+                     "GladeParentKey", settings_combo_mosi);
+  gtk_table_attach (GTK_TABLE (table2), settings_combo_mosi, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry3 = GTK_COMBO (combo3)->entry;
+  settings_combo_mosi_entry = GTK_COMBO (settings_combo_mosi)->entry;
 
-  combo4 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo4)->popwin),
-                     "GladeParentKey", combo4);
-  gtk_table_attach (GTK_TABLE (table2), combo4, 1, 2, 1, 2,
+  settings_combo_miso = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_miso)->popwin),
+                     "GladeParentKey", settings_combo_miso);
+  gtk_table_attach (GTK_TABLE (table2), settings_combo_miso, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry4 = GTK_COMBO (combo4)->entry;
+  settings_combo_miso_entry = GTK_COMBO (settings_combo_miso)->entry;
 
-  combo5 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo5)->popwin),
-                     "GladeParentKey", combo5);
-  gtk_table_attach (GTK_TABLE (table2), combo5, 1, 2, 2, 3,
+  settings_combo_rst = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_rst)->popwin),
+                     "GladeParentKey", settings_combo_rst);
+  gtk_table_attach (GTK_TABLE (table2), settings_combo_rst, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry5 = GTK_COMBO (combo5)->entry;
+  settings_combo_rst_entry = GTK_COMBO (settings_combo_rst)->entry;
 
-  combo6 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo6)->popwin),
-                     "GladeParentKey", combo6);
-  gtk_table_attach (GTK_TABLE (table2), combo6, 1, 2, 3, 4,
+  settings_combo_chk = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_chk)->popwin),
+                     "GladeParentKey", settings_combo_chk);
+  gtk_table_attach (GTK_TABLE (table2), settings_combo_chk, 1, 2, 3, 4,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry6 = GTK_COMBO (combo6)->entry;
+  settings_combo_chk_entry = GTK_COMBO (settings_combo_chk)->entry;
 
-  combo7 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo7)->popwin),
-                     "GladeParentKey", combo7);
-  gtk_table_attach (GTK_TABLE (table2), combo7, 1, 2, 4, 5,
+  settings_combo_sck = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_sck)->popwin),
+                     "GladeParentKey", settings_combo_sck);
+  gtk_table_attach (GTK_TABLE (table2), settings_combo_sck, 1, 2, 4, 5,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry7 = GTK_COMBO (combo7)->entry;
+  settings_combo_sck_entry = GTK_COMBO (settings_combo_sck)->entry;
 
   label4 = gtk_label_new ("Pins:");
   gtk_frame_set_label_widget (GTK_FRAME (frame2), label4);
