@@ -83,16 +83,16 @@ CHK always follows the state of RST and this can be used as a way of verifying
 that the device is connected properly.
 .TP
 \fI-p, --port=LOCATION\fP
-Use the serial device at the specified location. Should be a hexadecimal address for serial-raw and a device name (such as /dev/ttyS0 or /dev/ttyUSB0) for 
+Use the serial device at the specified location. Should be a hexadecimal address for serial-raw and parallel and a device name (such as /dev/ttyS0 or /dev/ttyUSB0) for 
 serial.
 .TP
 \fI-r, --rcfile=FILE\fP
 Read from the specified rcfile instead of from the \fB.at89progrc\fP file 
 in the users' home directory.
 .TP
-\fI-t, --type=serial|serial-raw\fP
+\fI-t, --type=serial|serial-raw|parallel\fP
 Driver to use. \fBserial\fP uses the standard serial port functionality. 
-\fBserial-raw\fP talks directly to the hardware and therefor requires root privileges. 
+\fBserial-raw\fP and \fBparallel\fP talk directly to the hardware and therefor requires root privileges. 
 Only use serial-raw if you have a buggy serial port driver.
 .TP
 \fI-v,--verbose\fP

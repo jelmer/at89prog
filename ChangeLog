@@ -2,3 +2,6 @@
  * Better timing mechanism
  * Add support for non-standard serial ports
  * Add parallel port support
+ * Fixed several minor bugs
+
+For all changes prior to 0.7, please check CVS at http://cvs.vernstok.nl/.

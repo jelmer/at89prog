@@ -1,4 +1,4 @@
-.TH AT89PROGRC 1 "6 August 2003"
+.TH AT89PROGRC 1 "1 February 2004"
 .SH NAME
 at89progrc \- configuration file for the at89prog programmer
 .SH SYNTAX
@@ -9,8 +9,12 @@ not allowed.
 The following keys are available:
 
 .TP
-\fIbase\fP
-Specifies base address (in hex) for port to use. Defaults to 3f8.
+\fItype\fP
+Type of port. Available values: serial, serial-raw, parallel
+
+.TP
+\fIport\fP
+Base address of port in case of serial-raw and parallel (such as 2f8, 378, etc). Path for serial (/dev/ttyS0, /dev/ttyUSB0).
 
 .TP
 \fIMOSI\fP
@@ -36,7 +40,7 @@ Specify on what pin the Clock line is connected. See \fBPINS\fP below for possib
 .SS PINS
 
 .TP
-All currently available pins are listed below. To reverse a pin, put a ! (exclamation mark) before it's name.
+All currently available pins for serial and serial-raw are listed below. To reverse a pin, put a ! (exclamation mark) before it's name.
 
 .TP
 .BR

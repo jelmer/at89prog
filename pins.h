@@ -9,7 +9,6 @@ struct pins_backend {
 	void (*clear) (int);
 	int (*get) (int);
 	int (*close) ();
-	int (*config)(char *name, char *value);
 };
 
 int BackendInit();
