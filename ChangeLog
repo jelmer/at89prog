@@ -1,3 +1,6 @@
+0.8:
+ * Add (optional) gtk frontend
+
 0.7: 
  * Better timing mechanism
  * Add support for non-standard serial ports

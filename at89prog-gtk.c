@@ -22,7 +22,7 @@ void
 on_new_activate                       (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	/* FIXME */
+	/* FIXME: Clear */
 }
 
 
@@ -96,6 +96,7 @@ on_settings_activate                  (GtkMenuItem     *menuitem,
 {
 	guint result;
 	GtkWidget *settingswin = create_settingswin();
+	gtk_widget_show_all(settingswin);
     result = gtk_dialog_run(GTK_DIALOG(settingswin));
 	switch(result) {
 		case GTK_RESPONSE_OK:
@@ -293,8 +294,6 @@ GtkWidget* create_mainwin (void)
   gtk_container_add (GTK_CONTAINER (device_menu), separatormenuitem1);
   gtk_widget_set_sensitive (separatormenuitem1, FALSE);
 
-
-
   download1 = gtk_menu_item_new_with_mnemonic ("_Download");
   gtk_container_add (GTK_CONTAINER (device_menu), download1);
 
@@ -408,9 +407,9 @@ GtkWidget* create_settingswin (void)
   GtkWidget *table1;
   GtkWidget *label2;
   GtkWidget *label3;
-  GtkWidget *combo1;
+  GtkWidget *settings_combo_port_type;
   GtkWidget *combo_entry1;
-  GtkWidget *combo2;
+  GtkWidget *settings_combo_port_location;
   GtkWidget *combo_entry2;
   GtkWidget *label1;
   GtkWidget *frame2;
@@ -462,23 +461,23 @@ GtkWidget* create_settingswin (void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label3), 0, 0.5);
 
-  combo1 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo1)->popwin),
-                     "GladeParentKey", combo1);
-  gtk_table_attach (GTK_TABLE (table1), combo1, 1, 2, 0, 1,
+  settings_combo_port_type = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_port_type)->popwin),
+                     "GladeParentKey", settings_combo_port_type);
+  gtk_table_attach (GTK_TABLE (table1), settings_combo_port_type, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry1 = GTK_COMBO (combo1)->entry;
+  combo_entry1 = GTK_COMBO (settings_combo_port_type)->entry;
 
-  combo2 = gtk_combo_new ();
-  g_object_set_data (G_OBJECT (GTK_COMBO (combo2)->popwin),
-                     "GladeParentKey", combo2);
-  gtk_table_attach (GTK_TABLE (table1), combo2, 1, 2, 1, 2,
+  settings_combo_port_location = gtk_combo_new ();
+  g_object_set_data (G_OBJECT (GTK_COMBO (settings_combo_port_location)->popwin),
+                     "GladeParentKey", settings_combo_port_location);
+  gtk_table_attach (GTK_TABLE (table1), settings_combo_port_location, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  combo_entry2 = GTK_COMBO (combo2)->entry;
+  combo_entry2 = GTK_COMBO (settings_combo_port_location)->entry;
 
   label1 = gtk_label_new ("Port");
   gtk_frame_set_label_widget (GTK_FRAME (frame1), label1);

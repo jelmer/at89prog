@@ -9,3 +9,4 @@ pins.c - Frontend for the various available 'pins'-backends. Does mapping
 	between the pins used by the microcontroller backend (at89ser.c) and 
 	the pin backend (parallel, serial or serial-raw)
 prog1.c - Simple command-line frontend. 
+at89prog-gtk.c - GTK frontend
