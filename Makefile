@@ -8,7 +8,7 @@ COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-para
 PROG_OBJ = at89prog.o $(COMMON_OBJ)
 GTKPROG_OBJ = at89prog-gtk.o $(COMMON_OBJ)
 
-all: at89prog check-gtk
+all: at89prog 
 doc: at89prog.pdf
 
 install: all doc

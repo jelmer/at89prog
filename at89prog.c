@@ -32,7 +32,7 @@
 
 #define VERSION		"0.7"
 
-char progress = 0;
+char progress = 0, ignore_errors = 0, dump = 0;
 
 char *port = NULL;
 
@@ -52,7 +52,6 @@ void usage(poptContext pc)
 
 void quit(int s)
 {
-	deactivate();
 	pins_fini();
 	fprintf(stderr, "Received signal, exiting...\n");
 	exit(0);
@@ -65,14 +64,15 @@ void writechar(char datamem, char do_verify, int address, int byte)
 	if(datamem)writedata(address, byte);
 	else writecode(address, byte);
 
+	if(dump) { printf("%02x ", byte); fflush(stdout); }
+
 	if(do_verify) {
 		if(datamem)d = readdata(address);
 		else d = readcode(address);
 
 		if(byte != d) {
 			fprintf(stderr, "Error verifying byte at offset 0x%x\n", address);
-			deactivate();
-			exit(1);
+			if(!ignore_errors) exit(1);
 		}
 	}
 	if(progress)fputc('.', stderr);
@@ -108,13 +108,13 @@ int writehex(FILE *fd, char do_verify, char datamem)
 		case HEX_FILE_CORRUPT_LINE:
 			fprintf(stderr, "Corrupt line %d in intel hex file\n", i);
 			errors++;
-			break;
+			return errors;
 		case HEX_FILE_END_OF_FILE:
 			if(progress)fputc('\n', stderr);
 			return errors;
 		default:
 			for(j = 0; j < length; j++) {
-				writechar(datamem, do_verify, address+j, ((char *)data)			[j]);
+				writechar(datamem, do_verify, address+j, ((unsigned char *)data)			[j]);
 			}
 			break;
 		}
@@ -135,8 +135,10 @@ int main(int argc, const char **argv)
 		POPT_AUTOHELP
 		{ "data-memory", 'd', POPT_ARG_NONE, &datamem, 0, "Write specified file to data memory" },
 		{ "code-memory", 'c', POPT_ARG_NONE, &codemem, 0, "Write specified file to code memory (default)" },
+		{ "dump", 'D', POPT_ARG_NONE, &dump, 0, "Dump written bytes to screen" },
 		{ "format", 'f', POPT_ARG_STRING, &format, 0, "File format (auto,hex,bin)" },
 		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
+		{ "ignore-errors", 'I', POPT_ARG_NONE, &ignore_errors, 0, "Ignore errors" },
 		{ "progress", 'P', POPT_ARG_NONE, &progress, 0, "Print progress dots" },
 		{ "verify", 'V', POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
 		{ "type", 't', POPT_ARG_STRING, &backendname, 't', "Type of port to use (serial, parallel or serial-raw)" },
@@ -180,6 +182,8 @@ int main(int argc, const char **argv)
 		fprintf(stderr, "RST set, but CHK is low\n");
 		return 1;
 	}
+
+	atexit(deactivate);
 	
 	if(!strcmp(poptPeekArg(pc), "reset"))
 	{ 
@@ -242,7 +246,6 @@ int main(int argc, const char **argv)
 
 		if(!poptPeekArg(pc)) {
 			fprintf(stderr, "readfile needs at least one argument (number of bytes to read\n");
-			deactivate();
 			return 1;
 		}
 
@@ -253,7 +256,6 @@ int main(int argc, const char **argv)
 			fd = fopen(poptGetArg(pc), "w+");
 			if(!fd) {
 				perror("fopen");
-				deactivate();
 				return 1;
 			}
 		}
@@ -276,17 +278,15 @@ int main(int argc, const char **argv)
 		programming();
 		if(!poptPeekArg(pc)) {
 			fprintf(stderr, "writebyte requires 2 arguments\n");
-			deactivate();
 			return 1;
 		}
-		address = strtol(poptGetArg(pc), NULL, 16);
+		address = strtol(poptGetArg(pc), NULL, 0);
 
 		if(!poptPeekArg(pc)) {
 			fprintf(stderr, "writebyte requires 2 arguments\n");
-			deactivate();
 			return 1;
 		}
-		byte = strtol(poptGetArg(pc), NULL, 16);
+		byte = strtol(poptGetArg(pc), NULL, 0);
 
 		writechar(datamem, do_verify, address, byte);
 		if(verbose)fprintf(stderr, "%x written to %x\n", byte, address);
@@ -296,10 +296,9 @@ int main(int argc, const char **argv)
 		programming();
 		if(!poptPeekArg(pc)) {
 			fprintf(stderr, "readbyte requires an argument\n");
-			deactivate();
 			return 1;
 		}
-		address = strtol(poptGetArg(pc), NULL, 16);
+		address = strtol(poptGetArg(pc), NULL, 0);
 
 		if(datamem) printf("%x\n", readdata(address));
 		else printf("%x\n", readcode(address));
@@ -314,7 +313,6 @@ int main(int argc, const char **argv)
 		usage(pc);
 	}
 
-	deactivate();
 	poptFreeContext(pc);
 	
 	return 0;

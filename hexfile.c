@@ -61,7 +61,7 @@ int readhexline(FILE *fd, void **data, size_t *len, long *address)
 		}
 
 		checksum1+=byte;
-		((char *)(*data))[j] = byte;
+		((unsigned char *)(*data))[j] = byte;
 	}
 
 	if(fscanf(fd, "%2x", &checksum2) < 1) {
