@@ -11,6 +11,8 @@
 
 #define VERSION		"0.5.1"
 
+char progress = 0;
+
 void usage(poptContext pc)
 {
 	poptPrintHelp(pc, stderr, 0);
@@ -57,15 +59,16 @@ int writebin(FILE *fd, char do_verify, char datamem)
 	{
 		writechar(datamem, do_verify, i, fgetc(fd));
 		i++;
-		fputc('.', stderr);
+		if(progress)fputc('.', stderr);
 	}
-	fputc('\n', stderr);
+	if(progress)fputc('\n', stderr);
 	return 0;
 }
 
 int writehex(FILE *fd, char do_verify, char datamem)
 {
-	int length; long address; int type;
+	int length; int addr1, addr2; int type;
+	long address;
 	int errors = 0;
 	int checksum1, checksum2;
 	int i, j, byte;
@@ -74,7 +77,7 @@ int writehex(FILE *fd, char do_verify, char datamem)
 	{
 		checksum1 = 0;
 		i++;
-		if(fscanf(fd, ":%2x%4lx%2x", &length, &address, &type) < 3) {
+		if(fscanf(fd, ":%2x%2x%2x%2x", &length, &addr1, &addr2, &type) < 3) {
 			fprintf(stderr, "Error reading intel hex file, line %d\n", i);
 			deactivate();
 			exit(1);
@@ -82,8 +85,10 @@ int writehex(FILE *fd, char do_verify, char datamem)
 
 		checksum1+=length;
 		checksum1+=type;
-		checksum1+=address & 0xFF;
-		checksum1+=address & 0xFF00;
+		checksum1+=addr1;
+		checksum1+=addr2;
+
+		address = addr1 * 0x100 + addr2;
 
 		if(type == 1) break;
 
@@ -121,16 +126,16 @@ int writehex(FILE *fd, char do_verify, char datamem)
 			}
 		}
 
-		fputc('.', stderr);
+		if(progress)fputc('.', stderr);
 	}
-	fputc('\n', stderr);
+	if(progress)fputc('\n', stderr);
 	return errors;
 }
 
 
 int main(int argc, const char **argv) 
 {
-	char datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
+	int datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
 	FILE *fd;
 	int newserport = -1;
 	char *format = "auto";
@@ -138,14 +143,15 @@ int main(int argc, const char **argv)
 	char c, print_usage = 1;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
-		{ "data-memory", 'd', POPT_ARG_VAL, &datamem, 0, "Write specified file to data memory" },
-		{ "code-memory", 'c', POPT_ARG_VAL, &codemem, 0, "Write specified file to code memory (default)" },
+		{ "data-memory", 'd', POPT_ARG_NONE, &datamem, 0, "Write specified file to data memory" },
+		{ "code-memory", 'c', POPT_ARG_NONE, &codemem, 0, "Write specified file to code memory (default)" },
 		{ "format", 'f', POPT_ARG_STRING, &format, 0, "File format (auto,hex,bin)" },
-		{ "ignore-chk", 'i', POPT_ARG_VAL, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
-		{ "verify", 0, POPT_ARG_VAL, &do_verify, 0, "Verify written bytes" }, 
+		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
+		{ "progress", 'P', POPT_ARG_NONE, &progress, 0, "Print progress dots" },
+		{ "verify", 'V', POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
 		{ "port", 'p', POPT_ARG_STRING, NULL, 'p', "Address of serial port to use [3f8]" },
 		{ "rcfile", 'r', POPT_ARG_STRING, &rcfile, 0, "Use rc file from specified location" },
-		{ "verbose", 'v', POPT_ARG_VAL, &verbose, 0, "Be verbose" },
+		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
 		POPT_TABLEEND
 	};
 
@@ -251,8 +257,8 @@ int main(int argc, const char **argv)
 				continue;
 			}
 
-			if(!errors)fprintf(stderr, "File %s programmed correctly\n", filename);
-			else fprintf(stderr, "File %s programmed with %d errors\n", filename, errors);
+			if(!errors && verbose)fprintf(stderr, "File %s programmed correctly\n", filename);
+			else if(verbose)fprintf(stderr, "File %s programmed with %d errors\n", filename, errors);
 			fclose(fd);
 		}
 	} else if(!strcmp(poptPeekArg(pc), "readfile")) {
@@ -283,10 +289,10 @@ int main(int argc, const char **argv)
 		for(i = 0; i < len; i++) {
 			if(datamem)fputc(readdata(i), fd);
 			else fputc(readcode(i), fd);
-			fputc('.', stderr);
+			if(progress)fputc('.', stderr);
 		}
 
-		fputc('\n', stderr);
+		if(progress)fputc('\n', stderr);
 			
 		if(verbose)fprintf(stderr, "%d bytes read\n", len);
 		fclose(fd);
