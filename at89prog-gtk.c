@@ -17,8 +17,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <gtk/gtk.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -27,6 +25,7 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
+#include <gtkhex.h>
 
 #include "pins.h"
 #include "at89ser.h"
@@ -38,6 +37,7 @@ char *rcfile;
 size_t bufferlen = 0;
 GtkWidget* create_aboutwin (void);
 GtkWidget* create_settingswin (void);
+HexDocument *data = NULL;
 
 void update_hex_field() 
 {
@@ -347,30 +347,7 @@ GtkWidget* create_mainwin (void)
   gtk_widget_show (scrolledwindow1);
   gtk_box_pack_start (GTK_BOX (vbox1), scrolledwindow1, TRUE, TRUE, 0);
 
-  hexview = gtk_tree_view_new();
-  hexstore = gtk_list_store_new(17, G_TYPE_LONG, 
-					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR,
-					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR,
-					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR,
-					G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR, G_TYPE_UCHAR);
-  gtk_tree_view_set_model(GTK_TREE_VIEW(hexview), GTK_TREE_MODEL(hexstore));
-  curcol = gtk_tree_view_column_new();
-  hexrenderer = gtk_cell_renderer_text_new();
-  gtk_tree_view_append_column(GTK_TREE_VIEW(hexview), curcol);
-  gtk_tree_view_column_pack_start(curcol, hexrenderer, TRUE);
-  gtk_tree_view_column_add_attribute(curcol, hexrenderer, "text", 0);
-  gtk_tree_view_column_set_cell_data_func(curcol, hexrenderer, hex_cell_data_func, GINT_TO_POINTER(0), NULL);
-  {
-	  int i;
-	  for(i = 1; i <= 16; i++) {
-	  	curcol = gtk_tree_view_column_new();
-  		hexrenderer = gtk_cell_renderer_text_new();
-  		gtk_tree_view_append_column(GTK_TREE_VIEW(hexview), curcol);
-		gtk_tree_view_column_pack_start(curcol, hexrenderer, TRUE);
-  		gtk_tree_view_column_add_attribute(curcol, hexrenderer, "text", i);
-		gtk_tree_view_column_set_cell_data_func(curcol, hexrenderer, hex_cell_data_func, GINT_TO_POINTER(i), NULL);
-	  }
-  }
+  hexview = gtk_hex_new(data);
   
   statusbar = gtk_statusbar_new ();
   gtk_box_pack_start (GTK_BOX (vbox1), statusbar, FALSE, FALSE, 0);

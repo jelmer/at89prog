@@ -1,7 +1,7 @@
 LIBS = -lpopt 
 DEBUG = -g3 #-pg -fprofile-arcs
-GTK_LIBS = `pkg-config --libs gtk+-2.0 glib-2.0`
-GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 glib-2.0`
+GTK_LIBS = `pkg-config --libs gtk+-2.0 glib-2.0 gtkhex`
+GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 glib-2.0 gtkhex`
 #DEBUG = 
 
 COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o hexfile.o
