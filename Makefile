@@ -1,8 +1,12 @@
 LIBS = -lpopt 
 DEBUG = -g3 #-pg -fprofile-arcs
+GTK_LIBS = `pkg-config --libs gtk+-2.0 glib-2.0`
+GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 glib-2.0`
 #DEBUG = 
 
-PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o
+COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o
+PROG_OBJ = prog1.o $(COMMON_OBJ)
+GTKPROG_OBJ = at89prog-gtk.o $(COMMON_OBJ)
 
 all: at89prog
 doc: at89prog.pdf
@@ -22,8 +26,14 @@ at89prog.pdf: at89prog.tex
 at89prog: $(PROG_OBJ)
 	$(CC) $(DEBUG) -Wall -O -o $@ $(PROG_OBJ) $(LIBS)
 
+at89prog-gtk: $(GTKPROG_OBJ)
+	$(CC) $(DEBUG) -Wall -O -o $@ $(GTKPROG_OBJ) $(LIBS) $(GTK_LIBS)
+
 %.o: %.c
-	$(CC) $(DEBUG) -Wall -O -c $< -o $@
+	$(CC) $(GTK_CFLAGS) $(DEBUG) -Wall -O -c $< -o $@
 
 clean: 
 	rm -f at89prog *.o core at89prog.aux at89prog.log at89prog.toc at89prog.pdf
+
+ctags: 
+	ctags *.c
