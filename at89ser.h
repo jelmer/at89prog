@@ -1,8 +1,6 @@
 #ifndef __AT89SER_H__
 #define __AT89SER_H__
 
-extern int serport;
-
 int activate();
 void deactivate();
 void programming();

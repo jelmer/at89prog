@@ -6,6 +6,7 @@
 #include <sys/io.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "pins.h"
 #include "at89ser.h"
 
 #define VERSION		"0.5.1"
@@ -131,7 +132,9 @@ int main(int argc, const char **argv)
 {
 	char datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
 	FILE *fd;
+	int newserport = -1;
 	char *format = "auto";
+	char *rcfile = NULL;
 	char c, print_usage = 1;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
@@ -141,6 +144,7 @@ int main(int argc, const char **argv)
 		{ "ignore-chk", 'i', POPT_ARG_VAL, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
 		{ "verify", 0, POPT_ARG_VAL, &do_verify, 0, "Verify written bytes" }, 
 		{ "port", 'p', POPT_ARG_STRING, NULL, 'p', "Address of serial port to use [3f8]" },
+		{ "rcfile", 'r', POPT_ARG_STRING, &rcfile, 0, "Use rc file from specified location" },
 		{ "verbose", 'v', POPT_ARG_VAL, &verbose, 0, "Be verbose" },
 		POPT_TABLEEND
 	};
@@ -152,9 +156,20 @@ int main(int argc, const char **argv)
 
 	while ((c = poptGetNextOpt(pc)) != -1) {
 		switch(c) {
-			case 'p': serport = strtol(poptGetOptArg(pc), NULL, 16); break;
+			case 'p': newserport = strtol(poptGetOptArg(pc), NULL, 16); break;
 				}
 	}
+
+	if(!rcfile) { 
+		rcfile = malloc(strlen(getenv("HOME")) + 20);
+		snprintf(rcfile, strlen(getenv("HOME")) + 20, "%s/.at89progrc", getenv("HOME")); 
+	}
+	
+	if(rcfile) {
+		if(readrcfile(rcfile) != 0) return 1;
+	}
+
+	if(newserport != -1)serport = newserport;
 
 	if(ioperm(serport, 7, 1) == -1) 
 	{

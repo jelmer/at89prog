@@ -5,7 +5,6 @@
  * for all the help with the debugging and research.
  */
 
-#include "config.h"
 #include <stdio.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -16,73 +15,12 @@
 #include <sys/time.h>
 #include <time.h>
 #include "at89ser.h"
-
-int serport = 0x2f8;
-
-#define INT_PORT   (serport+1)
-#define CONF_PORT  (serport+3)
-#define STATUS_OUT (serport+4)
-#define STATUS_IN  (serport+6)
+#include "pins.h"
 
 #define waitmillisec(n) { struct timespec ts = {0, 1000000ul * n}; /* 0 sec, 1e6 ns = 1ms */ nanosleep(&ts, NULL); }
 
 #define waitmicrosec(n) { int i; for(i = 0; i < n; i++) outb(0, 0x80); }
 	
-inline void SetSCK() 
-{ 
-	int status = inb(STATUS_OUT);
-	status |= 0x02; /* RTS, which is connected to SCK */
-	outb(status, STATUS_OUT);
-}
-
-inline void ClearSCK() 
-{ 
-	int status = inb(STATUS_OUT);
-	status &= ~0x02; /* RTS, which is connected to SCK */
-	outb(status, STATUS_OUT);
-}
-
-inline void ClearMOSI() 
-{
-	int status = inb(CONF_PORT);
-	status |= 0x40; /* TXD, which is connected to MOSI */
-	outb(status, CONF_PORT);
-}
-
-inline void SetMOSI() 
-{
-	int status = inb(CONF_PORT);
-	status &= ~0x40; /* TXD, which is connected to MOSI */
-	outb(status, CONF_PORT);
-}
-
-/* 0x10 on STATUS_IN is CTS, aka MISO */
-inline int GetMISO() 
-{ 
-	int r = !(inb(STATUS_IN) & 0x10);
-	return r;
-}
-
-/* 0x20 on STATUS_IN is DSR, aka CHK */
-inline int GetCHK() 
-{ 
-	return inb(STATUS_IN) & 0x20;
-}
-
-inline void SetRST() 
-{ 
-	int status = inb(STATUS_OUT);
-	status |= 0x1; /* DTR, which is connected to RST */
-	outb(status, STATUS_OUT);
-}
-
-inline void ClearRST() 
-{ 
-	int status = inb(STATUS_OUT);
-	status &= ~ 0x1; /* DTR, which is connected to RST */
-	outb(status, STATUS_OUT);
-}
-
 void SPI_Out(int b)
 {
 	int i;
