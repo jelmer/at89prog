@@ -26,4 +26,4 @@ at89prog: $(PROG_OBJ)
 	$(CC) $(DEBUG) -Wall -O -c $< -o $@
 
 clean: 
-	rm -f $(BINS) *.o core
+	rm -f at89prog *.o core at89prog.aux at89prog.log at89prog.toc at89prog.pdf
