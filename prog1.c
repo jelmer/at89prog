@@ -113,10 +113,13 @@ int writehex(FILE *fd, char do_verify, char datamem)
 			exit(1);
 		}
 
-		if((0x100 - (checksum1 & 0xFF)) != checksum2) {
+		checksum1 &= 0xFF;
+		checksum1 = (~checksum1 + 1) & 0xFF;
+
+		if(checksum1 != checksum2) {
 			fprintf(stderr, "Warning: checksums do NOT match in intel hex file, line %d\n"
 			"(%x != %x)\n" 
-					"File may be corrupt\n", i, 0x100 - (checksum1 & 0xFF), checksum2);
+					"File may be corrupt\n", i, checksum1, checksum2);
 			errors++;
 		}
 
