@@ -346,7 +346,7 @@ int main(int argc, const char **argv)
 		poptGetArg(pc);
 		programming();
 		if(!poptPeekArg(pc)) {
-			fprintf(stderr, "writebyte requires 2 arguments\n");
+			fprintf(stderr, "readbyte requires an argument\n");
 			deactivate();
 			return 1;
 		}
