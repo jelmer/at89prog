@@ -1,0 +1,15 @@
+Source: at89prog
+Section: electronics
+Priority: optional
+Maintainer: Jelmer Vernooij <jelmer@aurelia.vernstok.nl>
+Standards-Version: 3.5.8
+Build-Depends: debmake
+
+Package: at89prog
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: A serial port programmer for the AT89* series microcontrollers
+ at89prog is a command-line serial port programmer for the AT89* series 
+ microcontrollers. It can read and write single bytes to the code and 
+ data memory as well as complete files. It supports  
+ erasing the code and data memory, resetting the device, and locking the memory.
