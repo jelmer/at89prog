@@ -94,7 +94,7 @@ static int ser_get(int p)
 	case SER_PIN_DTR: return (status & TIOCM_DTR?1:0); 
 	case SER_PIN_RTS: return (status & TIOCM_RTS?1:0);
 	case SER_PIN_DSR: return (status & TIOCM_DSR?1:0);
-	case SER_PIN_CTS: return (status & TIOCM_CTS?1:0);
+	case SER_PIN_CTS: return (status & TIOCM_CTS?0:1);
 	default:
 		fprintf(stderr, "Read not available for pin %s\n", available_pins[p]);
 		return -1;
