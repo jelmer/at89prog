@@ -83,7 +83,7 @@ static void ser_clear(int p)
 		break;
 	}
 	
-	if(	ioctl (fd, TIOCMSET, &status) < 0) perror("ioctl");
+	if(ioctl (fd, TIOCMSET, &status) < 0) perror("ioctl");
 }
 
 static int ser_get(int p)
