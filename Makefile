@@ -2,7 +2,8 @@ LIBS = -lpopt
 DEBUG = -g3 #-pg -fprofile-arcs
 #DEBUG = 
 
-PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o
+PROG_OBJ = prog1.o at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o
+DELAYTEST_OBJ = delaytest.o delays.o
 
 all: at89prog
 doc: at89prog.pdf
@@ -21,6 +22,9 @@ at89prog.pdf: at89prog.tex
 
 at89prog: $(PROG_OBJ)
 	$(CC) $(DEBUG) -Wall -O -o $@ $(PROG_OBJ) $(LIBS)
+
+delaytest: $(DELAYTEST_OBJ)
+	$(CC) $(DEBUG) -Wall -O -o $@ $(DELAYTEST_OBJ)
 
 %.o: %.c
 	$(CC) $(DEBUG) -Wall -O -c $< -o $@

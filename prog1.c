@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "pins.h"
 #include "at89ser.h"
+#include "delays.h"
 
 #define VERSION		"0.6"
 
