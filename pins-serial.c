@@ -51,7 +51,7 @@ static void ser_set(int p)
 	
 	switch(p) {
 	case SER_PIN_TXD: 
-		if(ioctl (fd, TIOCSBRK, 0) < 0) perror("ioctl"); 
+		if(ioctl (fd, TIOCCBRK, 0) < 0) perror("ioctl");
 		break;
 	case SER_PIN_DTR: status |= TIOCM_DTR; break;
 	case SER_PIN_DSR: status |= TIOCM_LE; break;
@@ -72,7 +72,7 @@ static void ser_clear(int p)
 	
 	switch(p) {
 	case SER_PIN_TXD: 
-		if(ioctl (fd, TIOCCBRK, 0) < 0) perror("ioctl");
+		if(ioctl (fd, TIOCSBRK, 0) < 0) perror("ioctl"); 
 		  break;
 	case SER_PIN_DTR: status &=~TIOCM_DTR; break;
 	case SER_PIN_DSR: status &=~TIOCM_LE; break;
@@ -91,10 +91,10 @@ static int ser_get(int p)
 	int status;
 	if(ioctl(fd, TIOCMGET, &status) < 0) perror("ioctl");
 	switch(p) {
-	case SER_PIN_DTR: return status & TIOCM_DTR; 
-	case SER_PIN_RTS: return status & TIOCM_RTS;
-	case SER_PIN_DSR: return status & TIOCM_DSR;
-	case SER_PIN_CTS: return status & TIOCM_CTS;
+	case SER_PIN_DTR: return (status & TIOCM_DTR?1:0); 
+	case SER_PIN_RTS: return (status & TIOCM_RTS?1:0);
+	case SER_PIN_DSR: return (status & TIOCM_DSR?1:0);
+	case SER_PIN_CTS: return (status & TIOCM_CTS?1:0);
 	default:
 		fprintf(stderr, "Read not available for pin %s\n", available_pins[p]);
 		return -1;

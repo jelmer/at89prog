@@ -1,8 +1,6 @@
 #ifndef __PINS_H__
 #define __PINS_H__
 
-int readrcfile(char *name); 
-
 struct pins_backend { 
 	char *name;
 	char **available_pins;
