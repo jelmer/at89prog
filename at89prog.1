@@ -28,13 +28,14 @@ Only reset the device. Restarts currently running program.
 .TP
 \fIlock <level>\fP
 Sets lock on the code and data memory. Available levels are:
-.BR
+.PP
 2 - External movc access to internal code bytes is not possible. The 
 device is write-protected.
-.BR
+.PP
 3 - Same as 2, but the device is now read-protected as well.
-.BR
+.PP
 4 - Same as 3, but external execution is no longer possible either.
+.IP
 
 .TP
 \fIwritefile [file] ...\fP
@@ -64,9 +65,6 @@ Print version information.
 \fI--help\fP
 Help: show syntax.
 .TP
-\fI--version\fP
-Print current version.
-.TP
 \fI-d, --data-memory\fP
 Execute the specified command on the data memory instead of on the code 
 memory.
@@ -76,7 +74,8 @@ Execute the specified command on the colde memory. This is the default.
 .TP
 \fI-f, --format=hex,bin,auto\fP
 Specify the format the input files are in. Auto tries to figure out the type 
-of the file based on the first character (a colon indicates Intel hex).
+of the file based on the first character (a colon indicates Intel hex). The 
+default is auto.
 .TP
 \fI-i, --ignore-chk\fP
 Do not wait for the CHK line to follow the RST (reset) line. On some boards 
@@ -86,17 +85,23 @@ that the device is connected properly.
 \fI-p, --port=ADDRESS\fP
 Use the serial device at the specified port. The default is 0x3F8.
 .TP
-\fI-v\fP
+\fI-r, --rcfile=FILE\fP
+Read from the specified rcfile instead of from the \fB.at89progrc\fP file 
+in the users' home directory.
+.TP
+\fI-v,--verbose\fP
 Be verbose.
+.TP
+\fI--verify\fP
+When writing a byte to the memory, read the byte back to check whether 
+the write was successful.
 
 .SH SEE ALSO
-\fB
-at89progrc(5), ponyprog(1)
-\fP
+\fBat89progrc(5), ponyprog(1)\fP
 
 .SH AUTHOR
 \fBat89prog\fP and this man page were written by Jelmer Vernooij. 
 
 .SH THANKS
 Thanks to Hans Tjeerdsma for his help with debugging the output functions and 
-for his help with the research.
+and for his help with the research.

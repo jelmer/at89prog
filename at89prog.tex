@@ -179,6 +179,9 @@ void programming()
 
 \subsection{Erasing code and data memory}
 
+When the erase command is given, both the code and the data memory 
+are filled with zeroes.
+
 \begin{lstlisting}
 void erase()
 {
@@ -230,7 +233,7 @@ void writedata(int addr, char b)
 \begin{lstlisting}
 int readdata(int addr)
 {
-
+\
 	SPI_Out(0x05 | ((addr >> 5) & 0xF8));
 	SPI_Out(addr & 0xFF); /* llll llll */
 	return SPI_In();
@@ -238,6 +241,15 @@ int readdata(int addr)
 \end{lstlisting}
 
 \subsection{Locking memory}
+
+The 3 bits $p$, $q$ and $r$ in the function below specify what should be locked.
+
+\begin{itemize}
+\item[p] External movc access to the device is not possible. The device is 
+write protected.
+\item[q] The device is read-protected..
+\item[r] No external execution.
+\end{itemize}
 
 \begin{lstlisting}
 void lock(int byte)
