@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "at89ser.h"
 
-#define VERSION		"0.5"
+#define VERSION		"0.5.1"
 
 void usage(poptContext pc)
 {
@@ -49,7 +49,7 @@ void writechar(char datamem, char do_verify, int address, int byte)
 	}
 }
 
-void writebin(FILE *fd, char do_verify, char datamem)
+int writebin(FILE *fd, char do_verify, char datamem)
 {
 	int i = 0;
 	while(!feof(fd)) 
@@ -59,21 +59,30 @@ void writebin(FILE *fd, char do_verify, char datamem)
 		fputc('.', stderr);
 	}
 	fputc('\n', stderr);
+	return 0;
 }
 
-void writehex(FILE *fd, char do_verify, char datamem)
+int writehex(FILE *fd, char do_verify, char datamem)
 {
 	int length; long address; int type;
+	int errors = 0;
+	int checksum1, checksum2;
 	int i, j, byte;
 	i = 0;
 	while(!feof(fd)) 
 	{
+		checksum1 = 0;
 		i++;
 		if(fscanf(fd, ":%2x%4lx%2x", &length, &address, &type) < 3) {
 			fprintf(stderr, "Error reading intel hex file, line %d\n", i);
 			deactivate();
 			exit(1);
 		}
+
+		checksum1+=length;
+		checksum1+=type;
+		checksum1+=address & 0xFF;
+		checksum1+=address & 0xFF00;
 
 		if(type == 1) break;
 
@@ -86,10 +95,22 @@ void writehex(FILE *fd, char do_verify, char datamem)
 				exit(1);
 			}
 
+			checksum1+=byte;
 			writechar(datamem,do_verify,address+j,byte);
 		}
 
-		getc(fd); getc(fd); /* FIXME: Use checksum */
+		if(fscanf(fd, "%2x", &checksum2) < 1) {
+			fprintf(stderr, "Error reading checksum in intel hex file, line %d\n", i);
+			deactivate();
+			exit(1);
+		}
+
+		if((0x100 - (checksum1 & 0xFF)) != checksum2) {
+			fprintf(stderr, "Warning: checksums do NOT match in intel hex file, line %d\n"
+			"(%x != %x)\n" 
+					"File may be corrupt\n", i, 0x100 - (checksum1 & 0xFF), checksum2);
+			errors++;
+		}
 
 		while(!feof(fd)) { 
 			byte = getc(fd); 
@@ -102,6 +123,7 @@ void writehex(FILE *fd, char do_verify, char datamem)
 		fputc('.', stderr);
 	}
 	fputc('\n', stderr);
+	return errors;
 }
 
 
@@ -187,6 +209,7 @@ int main(int argc, const char **argv)
 		if(verbose) fprintf(stderr, "Locked at level %d\n", lock_level);
 	} else if(!strcmp(poptPeekArg(pc), "writefile"))
 	{
+		int errors;
 		poptGetArg(pc);
 		programming();
 		while(poptPeekArg(pc)) {
@@ -205,11 +228,16 @@ int main(int argc, const char **argv)
 			firstchar = getc(fd);
 			ungetc(firstchar, fd);
 
-			if(!strcmp(format, "hex") || (!strcmp(format, "auto") && firstchar == ':'))writehex(fd, do_verify, datamem);
-			else if(!strcmp(format, "auto") || !strcmp(format, "bin"))writebin(fd, do_verify, datamem);
-			else fprintf(stderr, "Unknown format %s, ignoring file\n", format);
+			if(!strcmp(format, "hex") || (!strcmp(format, "auto") && firstchar == ':'))errors = writehex(fd, do_verify, datamem);
+			else if(!strcmp(format, "auto") || !strcmp(format, "bin"))errors = writebin(fd, do_verify, datamem);
+			else {
+				fprintf(stderr, "Unknown format %s, ignoring file\n", format);
+				fclose(fd);
+				continue;
+			}
 
-			fprintf(stderr, "File %s programmed correctly\n", filename);
+			if(!errors)fprintf(stderr, "File %s programmed correctly\n", filename);
+			else fprintf(stderr, "File %s programmed with %d errors\n", filename, errors);
 			fclose(fd);
 		}
 	} else if(!strcmp(poptPeekArg(pc), "readfile")) {

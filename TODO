@@ -1,2 +1,2 @@
 - Make pins that are set configurable.
-- Use checksum when reading intel hex files
+- fix checksum checking and enable parallel port
