@@ -36,14 +36,17 @@ int readhexline(FILE *fd, void **data, size_t *len, long *address)
 
 	do { 
 		checksum1 = 0;
-		if(feof(fd)) {
-			return HEX_FILE_END_OF_FILE;
-		}
 
 		if(fscanf(fd, ":%2x%2x%2x%2x", &length, &addr1, &addr2, &type) < 3) {
 			return HEX_FILE_CORRUPT_LINE;
 		}
-	} while(type == 1 || type == 2);
+	} while(type == 2);
+
+	if(type == 0x01) return HEX_FILE_END_OF_FILE;
+
+	if(type != 0x00) {
+		return HEX_FILE_UNKNOWN_TYPE;
+	}
 
 	checksum1+=length;
 	checksum1+=type;

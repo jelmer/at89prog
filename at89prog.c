@@ -109,6 +109,10 @@ int writehex(FILE *fd, char do_verify, char datamem)
 			fprintf(stderr, "Corrupt line %d in intel hex file\n", i);
 			errors++;
 			return errors;
+		case HEX_FILE_UNKNOWN_TYPE:
+			fprintf(stderr, "Unknown file type at line %d in intel hex file\n", i);
+			errors++;
+			break;
 		case HEX_FILE_END_OF_FILE:
 			if(progress)fputc('\n', stderr);
 			return errors;
