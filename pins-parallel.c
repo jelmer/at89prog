@@ -76,12 +76,6 @@ static int raw_init(char *location)
 		return -1;
 	}
 
-	if(ioperm(0x80, 1, 1) == -1) 
-	{
-		perror("ioperm");
-		return -1;
-	}
-
 	return 0;
 }
 

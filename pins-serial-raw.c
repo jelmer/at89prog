@@ -54,19 +54,12 @@ static int ser_get(int p)
 
 static int raw_init(char *location) 
 {
-
 	if(location) serport = strtol(location, NULL, 16);
 
 	if(ioperm(serport, 7, 1) == -1) 
 	{
 		perror("ioperm");
 		fprintf(stderr, "Run at89prog with IO port access\n");
-		return -1;
-	}
-
-	if(ioperm(0x80, 1, 1) == -1) 
-	{
-		perror("ioperm");
 		return -1;
 	}
 
