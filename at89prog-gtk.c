@@ -12,11 +12,17 @@
 #include "pins.h"
 #include "at89ser.h"
 #include "delays.h"
+#include "hexfile.h"
 
 char *buffer = NULL;
 size_t bufferlen = 0;
 GtkWidget* create_aboutwin (void);
 GtkWidget* create_settingswin (void);
+
+void update_hex_field() 
+{
+	/* FIXME */
+}
 
 void
 on_new_activate                       (GtkMenuItem     *menuitem,
@@ -24,14 +30,14 @@ on_new_activate                       (GtkMenuItem     *menuitem,
 {
 	if(buffer)g_free(buffer);
 	bufferlen = 0; buffer = NULL;
-	/* FIXME: Clear */
+	update_hex_field();
 }
-
 
 void
 on_open_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+	int firstchar = 0;
 	GtkWidget *ok_button;
 	GtkWidget *cancel_button;
 	GtkWidget *openfilewin = gtk_file_selection_new ("Select File");
@@ -50,20 +56,13 @@ on_open_activate                      (GtkMenuItem     *menuitem,
 	switch(result) {
 	case GTK_RESPONSE_OK:
 		/* FIXME */
+		
 		break;
 
 	default:
 		break;
 	}
 	gtk_widget_destroy(openfilewin);
-}
-
-
-void
-on_save_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	/* FIXME */
 }
 
 
@@ -103,38 +102,6 @@ on_quit_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	gtk_main_quit();
-}
-
-
-void
-on_cut_activate                       (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	/* FIXME */
-}
-
-
-void
-on_copy_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	/* FIXME */
-}
-
-
-void
-on_paste_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	/* FIXME */
-}
-
-
-void
-on_delete_activate                    (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	/* FIXME */
 }
 
 
@@ -226,16 +193,11 @@ GtkWidget* create_mainwin (void)
   GtkWidget *menuitem4_menu;
   GtkWidget *new;
   GtkWidget *open;
-  GtkWidget *save;
   GtkWidget *save_as;
   GtkWidget *separatormenuitem1;
   GtkWidget *quit;
   GtkWidget *menuitem5;
   GtkWidget *menuitem5_menu;
-  GtkWidget *cut;
-  GtkWidget *copy;
-  GtkWidget *paste;
-  GtkWidget *delete;
   GtkWidget *device;
   GtkWidget *device_menu;
   GtkWidget *settings;
@@ -281,9 +243,6 @@ GtkWidget* create_mainwin (void)
   open = gtk_image_menu_item_new_from_stock ("gtk-open", accel_group);
   gtk_container_add (GTK_CONTAINER (menuitem4_menu), open);
 
-  save = gtk_image_menu_item_new_from_stock ("gtk-save", accel_group);
-  gtk_container_add (GTK_CONTAINER (menuitem4_menu), save);
-
   save_as = gtk_image_menu_item_new_from_stock ("gtk-save-as", accel_group);
   gtk_container_add (GTK_CONTAINER (menuitem4_menu), save_as);
 
@@ -299,18 +258,6 @@ GtkWidget* create_mainwin (void)
 
   menuitem5_menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem5), menuitem5_menu);
-
-  cut = gtk_image_menu_item_new_from_stock ("gtk-cut", accel_group);
-  gtk_container_add (GTK_CONTAINER (menuitem5_menu), cut);
-
-  copy = gtk_image_menu_item_new_from_stock ("gtk-copy", accel_group);
-  gtk_container_add (GTK_CONTAINER (menuitem5_menu), copy);
-
-  paste = gtk_image_menu_item_new_from_stock ("gtk-paste", accel_group);
-  gtk_container_add (GTK_CONTAINER (menuitem5_menu), paste);
-
-  delete = gtk_image_menu_item_new_from_stock ("gtk-delete", accel_group);
-  gtk_container_add (GTK_CONTAINER (menuitem5_menu), delete);
 
   device = gtk_menu_item_new_with_mnemonic ("_Device");
   gtk_container_add (GTK_CONTAINER (menubar), device);
@@ -389,26 +336,11 @@ GtkWidget* create_mainwin (void)
   g_signal_connect ((gpointer) open, "activate",
                     G_CALLBACK (on_open_activate),
                     NULL);
-  g_signal_connect ((gpointer) save, "activate",
-                    G_CALLBACK (on_save_activate),
-                    NULL);
   g_signal_connect ((gpointer) save_as, "activate",
                     G_CALLBACK (on_save_as_activate),
                     NULL);
   g_signal_connect ((gpointer) quit, "activate",
                     G_CALLBACK (on_quit_activate),
-                    NULL);
-  g_signal_connect ((gpointer) cut, "activate",
-                    G_CALLBACK (on_cut_activate),
-                    NULL);
-  g_signal_connect ((gpointer) copy, "activate",
-                    G_CALLBACK (on_copy_activate),
-                    NULL);
-  g_signal_connect ((gpointer) paste, "activate",
-                    G_CALLBACK (on_paste_activate),
-                    NULL);
-  g_signal_connect ((gpointer) delete, "activate",
-                    G_CALLBACK (on_delete_activate),
                     NULL);
   g_signal_connect ((gpointer) settings, "activate",
                     G_CALLBACK (on_settings_activate),

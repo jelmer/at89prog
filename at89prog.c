@@ -28,6 +28,7 @@
 #include "pins.h"
 #include "at89ser.h"
 #include "delays.h"
+#include "hexfile.h"
 
 #define VERSION		"0.7"
 
@@ -57,6 +58,7 @@ void quit(int s)
 	exit(0);
 }
 
+
 void writechar(char datamem, char do_verify, int address, int byte)
 {
 	int d;
@@ -73,6 +75,7 @@ void writechar(char datamem, char do_verify, int address, int byte)
 			exit(1);
 		}
 	}
+	if(progress)fputc('.', stderr);
 }
 
 int writebin(FILE *fd, char do_verify, char datamem)
@@ -82,7 +85,6 @@ int writebin(FILE *fd, char do_verify, char datamem)
 	{
 		writechar(datamem, do_verify, i, fgetc(fd));
 		i++;
-		if(progress)fputc('.', stderr);
 	}
 	if(progress)fputc('\n', stderr);
 	return 0;
@@ -90,74 +92,36 @@ int writebin(FILE *fd, char do_verify, char datamem)
 
 int writehex(FILE *fd, char do_verify, char datamem)
 {
-	int length; int addr1, addr2; int type;
+	int length; 
+	void *data;
 	long address;
+	int i = 0, j = 0;
 	int errors = 0;
-	int checksum1, checksum2;
-	int i, j, byte;
-	i = 0;
 	while(!feof(fd)) 
 	{
-		checksum1 = 0;
 		i++;
-		if(fscanf(fd, ":%2x%2x%2x%2x", &length, &addr1, &addr2, &type) < 3) {
-			fprintf(stderr, "Error reading intel hex file, line %d\n", i);
-			deactivate();
-			exit(1);
-		}
-
-		checksum1+=length;
-		checksum1+=type;
-		checksum1+=addr1;
-		checksum1+=addr2;
-
-		address = addr1 * 0x100 + addr2;
-
-		if(type == 1) break;
-
-		if(type == 2) continue;
-		
-		for(j = 0; j < length; j++) {
-			if(fscanf(fd, "%2x", &byte) < 1) {
-				fprintf(stderr, "Error reading byte %d in intel hex file, line %d\n", j, i);
-				deactivate();
-				exit(1);
-			}
-
-			checksum1+=byte;
-			writechar(datamem,do_verify,address+j,byte);
-		}
-
-		if(fscanf(fd, "%2x", &checksum2) < 1) {
-			fprintf(stderr, "Error reading checksum in intel hex file, line %d\n", i);
-			deactivate();
-			exit(1);
-		}
-
-		checksum1 &= 0xFF;
-		checksum1 = (~checksum1 + 1) & 0xFF;
-
-		if(checksum1 != checksum2) {
-			fprintf(stderr, "Warning: checksums do NOT match in intel hex file, line %d\n"
-			"(%x != %x)\n" 
-					"File may be corrupt\n", i, checksum1, checksum2);
+		switch(readhexline(fd, &data, &length, &address)) {
+		case HEX_FILE_ERR_CHECKSUM:
+			fprintf(stderr, "Checksum error in intel hex file, line %d\n", i);
 			errors++;
-		}
-
-		while(!feof(fd)) { 
-			byte = getc(fd); 
-			if(byte != '\n' && byte != '\r') {
-				ungetc(byte, fd);
-				break; 
+			break;
+		case HEX_FILE_CORRUPT_LINE:
+			fprintf(stderr, "Corrupt line %d in intel hex file\n", i);
+			errors++;
+			break;
+		case HEX_FILE_END_OF_FILE:
+			if(progress)fputc('\n', stderr);
+			return errors;
+		default:
+			for(j = 0; j < length; j++) {
+				writechar(datamem, do_verify, address+j, ((char *)data)			[j]);
 			}
+			break;
 		}
-
-		if(progress)fputc('.', stderr);
 	}
 	if(progress)fputc('\n', stderr);
 	return errors;
 }
-
 
 int main(int argc, const char **argv) 
 {
