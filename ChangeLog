@@ -1,0 +1,4 @@
+0.7: 
+ * Better timing mechanism
+ * Add support for non-standard serial ports
+ * Add parallel port support
