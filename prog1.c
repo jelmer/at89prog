@@ -113,32 +113,31 @@ int main(int argc, const char **argv)
 	char c, print_usage = 1;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
-
-		{ "data-memory", 'd', POPT_ARG_NONE, &datamem, 0, "Write specified file to data memory" },
-		{ "code-memory", 'c', POPT_ARG_NONE, &codemem, 0, "Write specified file to code memory (default)" },
+		{ "data-memory", 'd', POPT_ARG_VAL, &datamem, 0, "Write specified file to data memory" },
+		{ "code-memory", 'c', POPT_ARG_VAL, &codemem, 0, "Write specified file to code memory (default)" },
 		{ "format", 'f', POPT_ARG_STRING, &format, 0, "File format (auto,hex,bin)" },
-		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
-		{ "verify", 0, POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
+		{ "ignore-chk", 'i', POPT_ARG_VAL, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
+		{ "verify", 0, POPT_ARG_VAL, &do_verify, 0, "Verify written bytes" }, 
 		{ "port", 'p', POPT_ARG_STRING, NULL, 'p', "Address of serial port to use [3f8]" },
-		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
-		{ NULL }
+		{ "verbose", 'v', POPT_ARG_VAL, &verbose, 0, "Be verbose" },
+		POPT_TABLEEND
 	};
 
 	poptContext pc;
 
-	pc = poptGetContext(NULL, argc, argv, long_options, 0);
+	pc = poptGetContext(NULL, argc, argv, long_options, POPT_CONTEXT_KEEP_FIRST);
 	poptSetOtherOptionHelp(pc, "command [file-to-write]");
 
-	while ((c = poptGetNextOpt(pc)) >= 0) {
+	while ((c = poptGetNextOpt(pc)) != -1) {
 		switch(c) {
 			case 'p': serport = strtol(poptGetOptArg(pc), NULL, 16); break;
 				}
 	}
 
-
 	if(ioperm(serport, 7, 1) == -1) 
 	{
 		perror("ioperm");
+		fprintf(stderr, "Run at89prog with IO port access\n");
 		return 1;
 	}
 
@@ -151,6 +150,7 @@ int main(int argc, const char **argv)
 	signal(SIGINT, quit);
 	signal(SIGSEGV, quit);
 
+	poptGetArg(pc); /* drop argv[0] */
 
 	if(!poptPeekArg(pc)) 
 	{
