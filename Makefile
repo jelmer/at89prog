@@ -4,8 +4,8 @@ GTK_LIBS = `pkg-config --libs gtk+-2.0 glib-2.0`
 GTK_CFLAGS = `pkg-config --cflags gtk+-2.0 glib-2.0`
 #DEBUG = 
 
-COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o
-PROG_OBJ = prog1.o $(COMMON_OBJ)
+COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o hexfile.o
+PROG_OBJ = at89prog.o $(COMMON_OBJ)
 GTKPROG_OBJ = at89prog-gtk.o $(COMMON_OBJ)
 
 all: at89prog

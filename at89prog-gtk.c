@@ -22,6 +22,8 @@ void
 on_new_activate                       (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+	if(buffer)g_free(buffer);
+	bufferlen = 0; buffer = NULL;
 	/* FIXME: Clear */
 }
 
@@ -30,7 +32,30 @@ void
 on_open_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	/* FIXME */
+	GtkWidget *ok_button;
+	GtkWidget *cancel_button;
+	GtkWidget *openfilewin = gtk_file_selection_new ("Select File");
+	guint result;
+	gtk_container_set_border_width (GTK_CONTAINER (openfilewin), 10);
+
+	ok_button = GTK_FILE_SELECTION (openfilewin)->ok_button;
+	gtk_widget_show (ok_button);
+	GTK_WIDGET_SET_FLAGS (ok_button, GTK_CAN_DEFAULT);
+
+	cancel_button = GTK_FILE_SELECTION (openfilewin)->cancel_button;
+	gtk_widget_show (cancel_button);
+	GTK_WIDGET_SET_FLAGS (cancel_button, GTK_CAN_DEFAULT);
+
+	result = gtk_dialog_run(GTK_DIALOG(openfilewin));
+	switch(result) {
+	case GTK_RESPONSE_OK:
+		/* FIXME */
+		break;
+
+	default:
+		break;
+	}
+	gtk_widget_destroy(openfilewin);
 }
 
 
@@ -46,7 +71,30 @@ void
 on_save_as_activate                   (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	/* FIXME */
+	GtkWidget *ok_button;
+	GtkWidget *cancel_button;
+	GtkWidget *savefilewin = gtk_file_selection_new ("Select File");
+	guint result;
+	gtk_container_set_border_width (GTK_CONTAINER (savefilewin), 10);
+
+	ok_button = GTK_FILE_SELECTION (savefilewin)->ok_button;
+	gtk_widget_show (ok_button);
+	GTK_WIDGET_SET_FLAGS (ok_button, GTK_CAN_DEFAULT);
+
+	cancel_button = GTK_FILE_SELECTION (savefilewin)->cancel_button;
+	gtk_widget_show (cancel_button);
+	GTK_WIDGET_SET_FLAGS (cancel_button, GTK_CAN_DEFAULT);
+
+	result = gtk_dialog_run(GTK_DIALOG(savefilewin));
+	switch(result) {
+	case GTK_RESPONSE_OK:
+		/* FIXME */
+		break;
+
+	default:
+		break;
+	}
+	gtk_widget_destroy(savefilewin);
 }
 
 
@@ -128,7 +176,7 @@ on_erase_activate                     (GtkMenuItem     *menuitem,
 
 
 void
-on_data_memory1_activate               (GtkMenuItem     *menuitem,
+on_download_data_memory_activate               (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	/*FIXME*/
@@ -136,7 +184,7 @@ on_data_memory1_activate               (GtkMenuItem     *menuitem,
 
 
 void
-on_code_memory3_activate               (GtkMenuItem     *menuitem,
+on_download_code_memory_activate               (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	/*FIXME*/
@@ -144,7 +192,7 @@ on_code_memory3_activate               (GtkMenuItem     *menuitem,
 
 
 void
-on_data_memory2_activate               (GtkMenuItem     *menuitem,
+on_upload_data_memory_activate               (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	/*FIXME*/
@@ -152,7 +200,7 @@ on_data_memory2_activate               (GtkMenuItem     *menuitem,
 
 
 void
-on_code_memory2_activate               (GtkMenuItem     *menuitem,
+on_upload_code_memory_activate               (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	/*FIXME*/
@@ -188,7 +236,6 @@ GtkWidget* create_mainwin (void)
   GtkWidget *copy;
   GtkWidget *paste;
   GtkWidget *delete;
-  GtkWidget *menuitem6;
   GtkWidget *device;
   GtkWidget *device_menu;
   GtkWidget *settings;
@@ -197,12 +244,12 @@ GtkWidget* create_mainwin (void)
   GtkWidget *lock;
   GtkWidget *download1;
   GtkWidget *download1_menu;
-  GtkWidget *data_memory1;
-  GtkWidget *code_memory3;
+  GtkWidget *download_data_memory;
+  GtkWidget *download_code_memory;
   GtkWidget *upload3;
   GtkWidget *upload3_menu;
-  GtkWidget *data_memory2;
-  GtkWidget *code_memory2;
+  GtkWidget *upload_data_memory;
+  GtkWidget *upload_code_memory;
   GtkWidget *menuitem7;
   GtkWidget *menuitem7_menu;
   GtkWidget *about;
@@ -265,10 +312,7 @@ GtkWidget* create_mainwin (void)
   delete = gtk_image_menu_item_new_from_stock ("gtk-delete", accel_group);
   gtk_container_add (GTK_CONTAINER (menuitem5_menu), delete);
 
-  menuitem6 = gtk_menu_item_new_with_mnemonic ("_View");
-  gtk_container_add (GTK_CONTAINER (menubar), menuitem6);
-
-  device = gtk_menu_item_new_with_mnemonic ("Device");
+  device = gtk_menu_item_new_with_mnemonic ("_Device");
   gtk_container_add (GTK_CONTAINER (menubar), device);
 
   device_menu = gtk_menu_new ();
@@ -300,11 +344,11 @@ GtkWidget* create_mainwin (void)
   download1_menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (download1), download1_menu);
 
-  data_memory1 = gtk_menu_item_new_with_mnemonic ("_Data memory");
-  gtk_container_add (GTK_CONTAINER (download1_menu), data_memory1);
+  download_data_memory = gtk_menu_item_new_with_mnemonic ("_Data memory");
+  gtk_container_add (GTK_CONTAINER (download1_menu), download_data_memory);
 
-  code_memory3 = gtk_menu_item_new_with_mnemonic ("_Code memory");
-  gtk_container_add (GTK_CONTAINER (download1_menu), code_memory3);
+  download_code_memory = gtk_menu_item_new_with_mnemonic ("_Code memory");
+  gtk_container_add (GTK_CONTAINER (download1_menu), download_code_memory);
 
   upload3 = gtk_menu_item_new_with_mnemonic ("_Upload");
   gtk_container_add (GTK_CONTAINER (device_menu), upload3);
@@ -312,11 +356,11 @@ GtkWidget* create_mainwin (void)
   upload3_menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (upload3), upload3_menu);
 
-  data_memory2 = gtk_menu_item_new_with_mnemonic ("_Data memory");
-  gtk_container_add (GTK_CONTAINER (upload3_menu), data_memory2);
+  upload_data_memory = gtk_menu_item_new_with_mnemonic ("_Data memory");
+  gtk_container_add (GTK_CONTAINER (upload3_menu), upload_data_memory);
 
-  code_memory2 = gtk_menu_item_new_with_mnemonic ("_Code memory");
-  gtk_container_add (GTK_CONTAINER (upload3_menu), code_memory2);
+  upload_code_memory = gtk_menu_item_new_with_mnemonic ("_Code memory");
+  gtk_container_add (GTK_CONTAINER (upload3_menu), upload_code_memory);
 
   menuitem7 = gtk_menu_item_new_with_mnemonic ("_Help");
   gtk_container_add (GTK_CONTAINER (menubar), menuitem7);
@@ -376,17 +420,17 @@ GtkWidget* create_mainwin (void)
                     G_CALLBACK (on_erase_activate),
                     NULL);
 
-  g_signal_connect ((gpointer) data_memory1, "activate",
-                    G_CALLBACK (on_data_memory1_activate),
+  g_signal_connect ((gpointer) download_data_memory, "activate",
+                    G_CALLBACK (on_download_data_memory_activate),
                     NULL);
-  g_signal_connect ((gpointer) code_memory3, "activate",
-                    G_CALLBACK (on_code_memory3_activate),
+  g_signal_connect ((gpointer) download_code_memory, "activate",
+                    G_CALLBACK (on_download_code_memory_activate),
                     NULL);
-  g_signal_connect ((gpointer) data_memory2, "activate",
-                    G_CALLBACK (on_data_memory2_activate),
+  g_signal_connect ((gpointer) upload_data_memory, "activate",
+                    G_CALLBACK (on_upload_data_memory_activate),
                     NULL);
-  g_signal_connect ((gpointer) code_memory2, "activate",
-                    G_CALLBACK (on_code_memory2_activate),
+  g_signal_connect ((gpointer) upload_code_memory, "activate",
+                    G_CALLBACK (on_upload_code_memory_activate),
                     NULL);
   g_signal_connect ((gpointer) about, "activate",
                     G_CALLBACK (on_about_activate),
