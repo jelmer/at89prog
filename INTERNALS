@@ -1,0 +1,11 @@
+At89prog was programmed with modularity in mind.
+
+at89ser.c - Handles programming for the AT89S*
+delays.c - Bunch of delay functions
+pins-parallel.c - Parallel port backend for setting pins
+pins-serial-raw.c - Direct ('raw') driver for the serial port (requires root)
+pins-serial.c - User-level serial port backend
+pins.c - Frontend for the various available 'pins'-backends. Does mapping 
+	between the pins used by the microcontroller backend (at89ser.c) and 
+	the pin backend (parallel, serial or serial-raw)
+prog1.c - Simple command-line frontend. 

@@ -1,4 +1,5 @@
-base 2f8
+type serial
+port /dev/ttyS0
 MOSI TXD
 MISO CTS
 RST DTR

@@ -1,3 +1,22 @@
+/* 
+	at89prog
+	(c) 2003-2004 Jelmer Vernooij <jelmer@samba.org>
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include <stdio.h>
 #include <popt.h>
 #include <signal.h>
@@ -13,6 +32,9 @@
 #define VERSION		"0.6"
 
 char progress = 0;
+
+char *backendname = "serial";
+char *port = NULL;
 
 void usage(poptContext pc)
 {
@@ -145,7 +167,27 @@ int read_pin_configuration(char *name)
 	FILE *fd = fopen(name, "r");
 
 	if(!fd) { 
-		fprintf(stderr, "Can't open %s!\n", name);
+		fprintf(stderr, "Can't open %s!\n"
+						"Type 'man 5 at89prog' for information about the RC file format\n", name);
+		perror("fopen"); 
+		return 1; 
+	}
+
+	while(!feof(fd)) 
+	{
+		line++;
+		if(fscanf(fd, "%4s %6s\n", bit, pin) < 2) {
+			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
+			continue;
+		}
+
+		switch(SetPinVariable(bit, pin)) {
+		case -1: 
+			fprintf(stderr, "Invalid configuration variable '%s' at line %d in %s, ignoring\n", bit, line, name);
+			continue;
+	if(!fd) { 
+		fprintf(stderr, "Can't open %s!\n"
+						"Type 'man 5 at89prog' for information about the RC file format\n", name);
 		perror("fopen"); 
 		return 1; 
 	}
@@ -182,8 +224,6 @@ int main(int argc, const char **argv)
 	FILE *fd;
 	char *format = "auto";
 	char *rcfile = NULL;
-	char *type = "serial";
-	char *port = NULL;
 	char c, print_usage = 1;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
@@ -193,8 +233,8 @@ int main(int argc, const char **argv)
 		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
 		{ "progress", 'P', POPT_ARG_NONE, &progress, 0, "Print progress dots" },
 		{ "verify", 'V', POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
-		{ "type", 't', POPT_ARG_STRING, &type, 't', "Type of port to use (serial, parallel or serial-raw)" },
-		{ "port", 'p', POPT_ARG_STRING, &port, 'p', "Location of port to use" },
+		{ "type", 't', POPT_ARG_STRING, &backendname, 't', "Type of port to use (serial, parallel or serial-raw)" },
+		{ "port", 'p', POPT_ARG_STRING, &location, 'p', "Address of port to use" },
 		{ "rcfile", 'r', POPT_ARG_STRING, &rcfile, 0, "Use rc file from specified location" },
 		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
 		POPT_TABLEEND
@@ -217,14 +257,14 @@ int main(int argc, const char **argv)
 		rcfile = malloc(strlen(getenv("HOME")) + 20);
 		snprintf(rcfile, strlen(getenv("HOME")) + 20, "%s/.at89progrc", getenv("HOME")); 
 	}
-	
-	if(LoadPinBackend(type) != 0) return 1;
-	if(port)SetPinVariable(NULL, port);
-	if(BackendInit() != 0) return 1;
-	
+
 	if(rcfile) {
 		if(read_pin_configuration(rcfile) != 0) return 1;
 	}
+	
+	if(LoadPinBackend(backendname) != 0) return 1;
+	if(port)SetPinVariable(NULL, port);
+	if(BackendInit() != 0) return 1;
 
 	signal(SIGINT, quit);
 	signal(SIGSEGV, quit);
@@ -354,22 +394,3 @@ int main(int argc, const char **argv)
 			return 1;
 		}
 		address = strtol(poptGetArg(pc), NULL, 16);
-
-		if(datamem) printf("%x\n", readdata(address));
-		else printf("%x\n", readcode(address));
-	} else if(!strcmp(poptPeekArg(pc), "version")) {
-		  fprintf(stderr, "at89prog - a AT89S8252 programmer using SPI\n");
-		  fprintf(stderr, " Version "VERSION"\n");
-		  fprintf(stderr, " (C) 2003 Jelmer Vernooij <jelmer@samba.org>\n");
-		  fprintf(stderr, "  Published under the GNU GPL\n");
-		  return 0;
-	} else {
-		fprintf(stderr, "Unknown command %s\n", poptGetArg(pc));
-		usage(pc);
-	}
-
-	deactivate();
-	poptFreeContext(pc);
-	
-	return 0;
-}
