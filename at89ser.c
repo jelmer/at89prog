@@ -17,7 +17,7 @@
 #include <time.h>
 #include "at89ser.h"
 
-int serport = 0x3f8;
+int serport = 0x2f8;
 
 #define INT_PORT   (serport+1)
 #define CONF_PORT  (serport+3)
@@ -26,11 +26,7 @@ int serport = 0x3f8;
 
 #define waitmillisec(n) { struct timespec ts = {0, 1000000ul * n}; /* 0 sec, 1e6 ns = 1ms */ nanosleep(&ts, NULL); }
 
-#ifndef SLOW_COMPUTER
-#define waitmicrosec(n) { struct timespec ts = {0, 1000ul * n}; /* 0 sec, 1e9 ns = 1micros */ nanosleep(&ts, NULL);}
-#else
-#define waitmicrosec(n) { int i; for(i = 0; i < SLOW_COMPUTER * n; i++); }  
-#endif
+#define waitmicrosec(n) { int i; for(i = 0; i < n; i++) outb(0, 0x80); }
 	
 inline void SetSCK() 
 { 
