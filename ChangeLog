@@ -1,4 +1,6 @@
 0.8:
+ * Fix major bug in hex parsing code
+ * Detect EOF correctly in Intel hex files
  * Add (optional) gtk frontend
 
 0.7: 
