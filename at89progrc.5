@@ -1,0 +1,59 @@
+.TH AT89PROGRC 1 "6 August 2003"
+.SH NAME
+at89progrc \- configuration file for the at89prog programmer
+.SH SYNTAX
+All lines consistent of a key and value pair. Comments and empty lines are 
+not allowed.
+
+.SH KEYS
+The following keys are available:
+
+.TP
+\fIbase\fP
+Specifies base address (in hex) for port to use. Defaults to 3f8.
+
+.TP
+\fIMOSI\fP
+Specify on what pin the Master Out, Slave In line is connected. See \fBPINS\fP below for possible values.
+
+.TP
+\fIMISO\fP
+Specify on what pin the Master In, Slave Out line is connected. See \fBPINS\fP below for possible values.
+
+.TP
+\fIRST\fP
+Specify on what pin the Reset line is connected. See \fBPINS\fP below for possible values.
+
+.TP
+\fICHK\fP
+Specify on what pin the Check line is connected. See \fBPINS\fP below for possible values.
+
+.TP
+\fISCK\fP
+Specify on what pin the Clock line is connected. See \fBPINS\fP below for possible values.
+
+
+.SS PINS
+
+.TP
+All currently available pins are listed below. To reverse a pin, put a ! (exclamation mark) before it's name.
+
+.TP
+.BR
+RTS
+.BR
+TXD
+.BR
+CTS
+.BR
+DSR
+.BR
+DTR
+
+.SH SEE ALSO
+\fB
+at89prog(1)
+\fP
+
+.SH AUTHOR
+\fBat89prog\fP and this man page were written by Jelmer Vernooij. 

@@ -15,7 +15,7 @@ struct pin {
 	char reverse;
 };
 
-int serport = 0x2f8;
+int serport = 0x3f8;
 
 struct pin pins[] = {
 	{ "RTS", 4, 0x02, 0},
