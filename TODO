@@ -1,2 +1,5 @@
 - fixes for pins (The TXD set function now sets it to negative, instead of positive), same goes for the CTS pin
+ - read configuration file in pins.c
+ - pins_set_backend()
+ - pins_set_location()
 - handle 'type' and 'port' in .at89progrc correctly

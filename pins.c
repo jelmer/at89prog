@@ -38,6 +38,9 @@ char *pin_names[] = { "MOSI", "SCK", "RST", "CHK", "MISO", NULL };
 int pin_mapping[5] = { -1, -1, -1, -1, -1 };
 int pin_reverse[5] = { 0, 0, 0, 0, 0 };
 
+#define MAXLEN 100
+#define MAXSETTINGS 100
+
 static struct pins_backend *backend = NULL;
 extern struct pins_backend serial_raw, serial, parallel;
 static struct pins_backend *pins_backends[] = {
@@ -46,6 +49,13 @@ static struct pins_backend *pins_backends[] = {
 	&parallel,
 	NULL
 };
+
+static struct confsetting {
+	char name[MAXLEN];
+	char value[MAXLEN];
+} confsettings[MAXSETTINGS];
+
+static int num_confsettings = 0;
 
 int get_pin_id(char *name)
 {
@@ -63,6 +73,64 @@ int backend_get_pin_id(char *name)
 		if(!strcmp(backend->available_pins[i], name)) return i;
 	}
 	return -1;
+}
+
+int pins_read_config_file(char *name) 
+{
+	char bit[10], pin[10];
+	int line = 0;
+	FILE *fd = fopen(name, "r");
+
+	if(!fd) { 
+		fprintf(stderr, "Can't open %s!\n"
+						"Type 'man 5 at89prog' for information about the RC file format\n", name);
+		perror("fopen"); 
+		return 1; 
+	}
+
+	while(!feof(fd)) 
+	{
+		line++;
+		if(fscanf(fd, "%100s %100s\n", bit, pin) < 2) {
+			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
+			continue;
+		}
+
+		if(!strcasecmp(bit, "type")) pins_set_backend(pin);
+		else if(!strcasecmp(bit, "port")) pins_set_location(pin);
+		else {
+			if(num_confsettings > MAXSETTINGS) {
+				fprintf(stderr, "Maximum number of %d configuration settings reached\n", num_confsettings);
+				return -1;
+			}
+			strncpy(confsettings[num_confsettings].name, bit, MAXLEN);
+			strncpy(confsettings[num_confsettings].value, pin, MAXLEN);
+			num_confsettings++;
+		}
+	}
+
+	fclose(fd);
+	return 0;
+}
+
+int pins_set_backend(char *name) 
+{
+	int i;
+	for(i = 0; pins_backends[i]; i++) {
+		if(!strcmp(pins_backends[i]->name, name)) {
+			backend = pins_backends[i];
+			return 0;
+		}
+	}
+	
+	fprintf(stderr, "No such port type '%s'\n", name);
+	return -1;
+}
+
+int pins_set_location(char *loc)
+{
+	location = strdup(loc);
+	return 0;
 }
 
 int SetPinVariable(char *name, char *value) 
@@ -95,6 +163,19 @@ int SetPinVariable(char *name, char *value)
 
 	return -1;
 }
+
+int pins_init()
+{
+	int i;
+	if(!backend) backend = pins_backends[0];
+	for(i = 0; i < num_confsettings; i++) {
+		SetPinVariable(confsettings[i].name, confsettings[i].value);
+	}
+
+	return backend->init(location);
+}
+
+
 
 void SetMOSI() { 
 	if(pin_mapping[PIN_MOSI] == -1) return;
@@ -144,25 +225,7 @@ int GetMISO() {
 	return backend->get(pin_mapping[PIN_MISO]); 
 }
 
-int LoadPinBackend(char *name) 
-{
-	int i;
-	for(i = 0; pins_backends[i]; i++) {
-		if(!strcmp(pins_backends[i]->name, name)) {
-			backend = pins_backends[i];
-			return 0;
-		}
-	}
-	fprintf(stderr, "No such port type '%s'\n", name);
-	return -1;
-}
-
-int BackendInit()
-{
-	return backend->init(location);
-}
-
-int ClosePinBackend() 
+int pins_fini() 
 { 
 	if(backend->close) return backend->close(); 
 	return 0;

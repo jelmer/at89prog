@@ -29,7 +29,11 @@ struct pins_backend {
 	int (*close) ();
 };
 
-int BackendInit();
+int pins_read_config_file(char *);
+int pins_set_backend(char *);
+int pins_set_location(char *);
+int pins_init();
+int pins_fini();
 
 void SetMOSI();
 void ClearMOSI();
@@ -37,10 +41,7 @@ void SetRST();
 void ClearRST();
 void SetSCK();
 void ClearSCK();
-int ClosePinBackend();
 int GetCHK();
 int GetMISO();
-int SetPinVariable(char *name, char *Value);
-int LoadPinBackend(char *name);
 
 #endif

@@ -33,7 +33,6 @@
 
 char progress = 0;
 
-char *backendname = "serial";
 char *port = NULL;
 
 void usage(poptContext pc)
@@ -53,7 +52,7 @@ void usage(poptContext pc)
 void quit(int s)
 {
 	deactivate();
-	ClosePinBackend();
+	pins_fini();
 	fprintf(stderr, "Received signal, exiting...\n");
 	exit(0);
 }
@@ -160,64 +159,6 @@ int writehex(FILE *fd, char do_verify, char datamem)
 }
 
 
-int read_pin_configuration(char *name)
-{
-	char bit[10], pin[10];
-	int line = 0;
-	FILE *fd = fopen(name, "r");
-
-	if(!fd) { 
-		fprintf(stderr, "Can't open %s!\n"
-						"Type 'man 5 at89prog' for information about the RC file format\n", name);
-		perror("fopen"); 
-		return 1; 
-	}
-
-	while(!feof(fd)) 
-	{
-		line++;
-		if(fscanf(fd, "%4s %6s\n", bit, pin) < 2) {
-			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
-			continue;
-		}
-
-		switch(SetPinVariable(bit, pin)) {
-		case -1: 
-			fprintf(stderr, "Invalid configuration variable '%s' at line %d in %s, ignoring\n", bit, line, name);
-			continue;
-	if(!fd) { 
-		fprintf(stderr, "Can't open %s!\n"
-						"Type 'man 5 at89prog' for information about the RC file format\n", name);
-		perror("fopen"); 
-		return 1; 
-	}
-
-	while(!feof(fd)) 
-	{
-		line++;
-		if(fscanf(fd, "%4s %6s\n", bit, pin) < 2) {
-			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
-			continue;
-		}
-
-		switch(SetPinVariable(bit, pin)) {
-		case -1: 
-			fprintf(stderr, "Invalid configuration variable '%s' at line %d in %s, ignoring\n", bit, line, name);
-			continue;
-
-		case -2:
-			fprintf(stderr, "Invalid value '%s' for configuration variable '%s' at line %d in %s, ignoring\n", pin, bit, line, name);
-			continue;
-
-		default:
-			break;
-		}
-	}
-	
-	fclose(fd);
-	return 0;
-}
-
 int main(int argc, const char **argv) 
 {
 	int datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
@@ -225,6 +166,7 @@ int main(int argc, const char **argv)
 	char *format = "auto";
 	char *rcfile = NULL;
 	char c, print_usage = 1;
+	char *backendname = NULL, *location = NULL;
 	struct poptOption long_options[] = {
 		POPT_AUTOHELP
 		{ "data-memory", 'd', POPT_ARG_NONE, &datamem, 0, "Write specified file to data memory" },
@@ -259,12 +201,12 @@ int main(int argc, const char **argv)
 	}
 
 	if(rcfile) {
-		if(read_pin_configuration(rcfile) != 0) return 1;
+		if(pins_read_config_file(rcfile) != 0) return 1;
 	}
 	
-	if(LoadPinBackend(backendname) != 0) return 1;
-	if(port)SetPinVariable(NULL, port);
-	if(BackendInit() != 0) return 1;
+	if(backendname && pins_set_backend(backendname) != 0) return 1;
+	if(location && pins_set_location(location) != 0) return 1;
+	if(pins_init() != 0) return 1;
 
 	signal(SIGINT, quit);
 	signal(SIGSEGV, quit);
@@ -394,3 +336,22 @@ int main(int argc, const char **argv)
 			return 1;
 		}
 		address = strtol(poptGetArg(pc), NULL, 16);
+
+		if(datamem) printf("%x\n", readdata(address));
+		else printf("%x\n", readcode(address));
+	} else if(!strcmp(poptPeekArg(pc), "version")) {
+		  fprintf(stderr, "at89prog - a AT89S8252 programmer using SPI\n");
+		  fprintf(stderr, " Version "VERSION"\n");
+		  fprintf(stderr, " (C) 2003 Jelmer Vernooij <jelmer@samba.org>\n");
+		  fprintf(stderr, "  Published under the GNU GPL\n");
+		  return 0;
+	} else {
+		fprintf(stderr, "Unknown command %s\n", poptGetArg(pc));
+		usage(pc);
+	}
+
+	deactivate();
+	poptFreeContext(pc);
+	
+	return 0;
+}
