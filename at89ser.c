@@ -16,11 +16,8 @@
 #include <time.h>
 #include "at89ser.h"
 #include "pins.h"
+#include "delays.h"
 
-#define waitmillisec(n) { struct timespec ts = {0, 1000000ul * n}; /* 0 sec, 1e6 ns = 1ms */ nanosleep(&ts, NULL); }
-
-#define waitmicrosec(n) { long long i = n * 10000; while(i)i--; }
-	
 void SPI_Out(int b)
 {
 	int i;
