@@ -85,7 +85,7 @@ static int raw_init(char *location)
 	return 0;
 }
 
-struct pins_backend parial_raw = {
+struct pins_backend parallel = {
 	"parallel",
 	available_pins,
 	raw_init,

@@ -190,7 +190,7 @@ int main(int argc, const char **argv)
 		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
 		{ "progress", 'P', POPT_ARG_NONE, &progress, 0, "Print progress dots" },
 		{ "verify", 'V', POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
-		{ "type", 't', POPT_ARG_STRING, &type, 't', "Type of port to use (serial or serial-raw)" },
+		{ "type", 't', POPT_ARG_STRING, &type, 't', "Type of port to use (serial, parallel or serial-raw)" },
 		{ "port", 'p', POPT_ARG_STRING, &port, 'p', "Location of port to use" },
 		{ "rcfile", 'r', POPT_ARG_STRING, &rcfile, 0, "Use rc file from specified location" },
 		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
@@ -355,7 +355,7 @@ int main(int argc, const char **argv)
 		if(datamem) printf("%x\n", readdata(address));
 		else printf("%x\n", readcode(address));
 	} else if(!strcmp(poptPeekArg(pc), "version")) {
-		  fprintf(stderr, "at89prog - a AT89S8252 programmer over the serial port\n");
+		  fprintf(stderr, "at89prog - a AT89S8252 programmer using SPI\n");
 		  fprintf(stderr, " Version "VERSION"\n");
 		  fprintf(stderr, " (C) 2003 Jelmer Vernooij <jelmer@samba.org>\n");
 		  fprintf(stderr, "  Published under the GNU GPL\n");
