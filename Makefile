@@ -13,7 +13,7 @@ install: all doc
 	mkdir -p $(DESTDIR)/usr/share/man/man1
 	cp at89prog.1 $(DESTDIR)/usr/share/man/man1
 	mkdir -p $(DESTDIR)/usr/share/doc/at89prog
-	cp TODO COPYING AUTHORS at89prog.pdf $(DESTDIR)/usr/share/doc/at89prog
+	cp at89progrc.example TODO COPYING AUTHORS at89prog.pdf $(DESTDIR)/usr/share/doc/at89prog
 
 at89prog.pdf: at89prog.tex
 	pdflatex $<
