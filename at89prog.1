@@ -1,0 +1,102 @@
+.TH AT89PROG 1 "4 August 2003"
+.SH NAME
+at89prog \- command-line utility for programming the AT89S8252 processor 
+over the serial port
+.SH SYNOPSIS
+\fBat89prog\fP [\fIflags\fP] command [arguments]
+
+.SH DESCRIPTION
+\fBat89prog\fP is a command-line utility that can be used to manipulate 
+the code and data memory on a AT89S8252 processor (and similar).
+The programmer currently only works with programmers working over 
+the serial port, though support for parallel ports may be added in the future.
+
+\fBat89prog\fP can write, read, erase and lock the code and data memory of the 
+microcontroller.
+
+.SH COMMANDS
+
+.TP
+\fIerase\fP
+Erases both the code and the data memory of the controller. All bytes will
+be filled with 0xFF (255).
+
+.TP
+\fIreset\fP
+Only reset the device. Restarts currently running program.
+
+.TP
+\fIlock <level>\fP
+Sets lock on the code and data memory. Available levels are:
+.BR
+2 - External movc access to internal code bytes is not possible. The 
+device is write-protected.
+.BR
+3 - Same as 2, but the device is now read-protected as well.
+.BR
+4 - Same as 3, but external execution is no longer possible either.
+
+.TP
+\fIwritefile [file] ...\fP
+Write the specified file(s) to the device. The file should be in the format 
+specified by \fB--format\fP. If a file specified is '-', data will be read 
+from standard in(stdin).
+
+.TP
+\fIreadfile <len> [file]\fP
+Read \fB<len>\fP number of bytes and store them in the specified file. If
+no file was specified, the bytes will be written to stdout.
+
+.TP
+\fIwritebyte <address> <byte>\fP
+Write the specified \fB<byte>\fP at the specified memory \fB<address>\fP.
+
+.TP
+\fIreadbyte <address>\fP
+Read the byte at the specified address and output it.
+
+.TP
+\fIversion\fP
+Print version information.
+
+.SS OPTIONS
+.TP
+\fI--help\fP
+Help: show syntax.
+.TP
+\fI--version\fP
+Print current version.
+.TP
+\fI-d, --data-memory\fP
+Execute the specified command on the data memory instead of on the code 
+memory.
+.TP
+\fI-c, --code-memory\fP
+Execute the specified command on the colde memory. This is the default.
+.TP
+\fI-f, --format=hex,bin,auto\fP
+Specify the format the input files are in. Auto tries to figure out the type 
+of the file based on the first character (a colon indicates Intel hex).
+.TP
+\fI-i, --ignore-chk\fP
+Do not wait for the CHK line to follow the RST (reset) line. On some boards 
+CHK always follows the state of RST and this can be used as a way of verifying 
+that the device is connected properly.
+.TP
+\fI-p, --port=ADDRESS\fP
+Use the serial device at the specified port. The default is 0x3F8.
+.TP
+\fI-v\fP
+Be verbose.
+
+.SH SEE ALSO
+\fB
+ponyprog(1)
+\fP
+
+.SH AUTHOR
+\fBat89prog\fP and this man page were written by Jelmer Vernooij. 
+
+.SH THANKS
+Thanks to Hans Tjeerdsma for his help with debugging the output functions and 
+for his help with the research.

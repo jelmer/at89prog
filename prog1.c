@@ -1,0 +1,292 @@
+#include <stdio.h>
+#include <popt.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <string.h>
+#include <sys/io.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "at89ser.h"
+
+#define VERSION		"0.5"
+
+void usage(poptContext pc)
+{
+	poptPrintHelp(pc, stderr, 0);
+	fprintf(stderr, "\nAvailable commands: \n"
+			"\terase\n"
+			"\treset\n"
+			"\tlock <level>\n"
+			"\twritefile [file] ...\n"
+			"\treadfile <len> [file] ...\n"
+			"\twritebyte <address> <byte>\n"
+			"\treadbyte <address>\n"
+			"\tversion\n");
+}
+
+void quit(int s)
+{
+	deactivate();
+	fprintf(stderr, "Received signal, exiting...\n");
+	exit(0);
+}
+
+void writechar(char datamem, char do_verify, int address, int byte)
+{
+	int d;
+	if(datamem)writedata(address, byte);
+	else writecode(address, byte);
+
+	if(do_verify) {
+		if(datamem)d = readdata(address);
+		else d = readcode(address);
+
+		if(byte != d) {
+			fprintf(stderr, "Error verifying byte at offset 0x%x\n", address);
+			deactivate();
+			exit(1);
+		}
+	}
+}
+
+void writebin(FILE *fd, char do_verify, char datamem)
+{
+	int i = 0;
+	while(!feof(fd)) 
+	{
+		writechar(datamem, do_verify, i, fgetc(fd));
+		i++;
+		fputc('.', stderr);
+	}
+	fputc('\n', stderr);
+}
+
+void writehex(FILE *fd, char do_verify, char datamem)
+{
+	int length; long address; int type;
+	int i, j, byte;
+	i = 0;
+	while(!feof(fd)) 
+	{
+		i++;
+		if(fscanf(fd, ":%2x%4lx%2x", &length, &address, &type) < 3) {
+			fprintf(stderr, "Error reading intel hex file, line %d\n", i);
+			deactivate();
+			exit(1);
+		}
+
+		if(type == 1) break;
+
+		if(type == 2) continue;
+		
+		for(j = 0; j < length; j++) {
+			if(fscanf(fd, "%2x", &byte) < 1) {
+				fprintf(stderr, "Error reading byte %d in intel hex file, line %d\n", j, i);
+				deactivate();
+				exit(1);
+			}
+
+			writechar(datamem,do_verify,address+j,byte);
+		}
+
+		getc(fd); getc(fd); /* FIXME: Use checksum */
+
+		while(!feof(fd)) { 
+			byte = getc(fd); 
+			if(byte != '\n' && byte != '\r') {
+				ungetc(byte, fd);
+				break; 
+			}
+		}
+
+		fputc('.', stderr);
+	}
+	fputc('\n', stderr);
+}
+
+
+int main(int argc, const char **argv) 
+{
+	char datamem = 0, codemem = 0, verbose = 0, do_verify = 0, ignore_chk = 0;
+	FILE *fd;
+	char *format = "auto";
+	char c, print_usage = 1;
+	struct poptOption long_options[] = {
+		POPT_AUTOHELP
+
+		{ "data-memory", 'd', POPT_ARG_NONE, &datamem, 0, "Write specified file to data memory" },
+		{ "code-memory", 'c', POPT_ARG_NONE, &codemem, 0, "Write specified file to code memory (default)" },
+		{ "format", 'f', POPT_ARG_STRING, &format, 0, "File format (auto,hex,bin)" },
+		{ "ignore-chk", 'i', POPT_ARG_NONE, &ignore_chk, 0, "Don't wait for CHK to confirm RST" },
+		{ "verify", 0, POPT_ARG_NONE, &do_verify, 0, "Verify written bytes" }, 
+		{ "port", 'p', POPT_ARG_STRING, NULL, 'p', "Address of serial port to use [3f8]" },
+		{ "verbose", 'v', POPT_ARG_NONE, &verbose, 0, "Be verbose" },
+		{ NULL }
+	};
+
+	poptContext pc;
+
+	pc = poptGetContext(NULL, argc, argv, long_options, 0);
+	poptSetOtherOptionHelp(pc, "command [file-to-write]");
+
+	while ((c = poptGetNextOpt(pc)) >= 0) {
+		switch(c) {
+			case 'p': serport = strtol(poptGetOptArg(pc), NULL, 16); break;
+				}
+	}
+
+
+	if(ioperm(serport, 7, 1) == -1) 
+	{
+		perror("ioperm");
+		return 1;
+	}
+
+	signal(SIGINT, quit);
+	signal(SIGSEGV, quit);
+
+
+	if(!poptPeekArg(pc)) 
+	{
+		usage(pc);
+		return 0;
+	}
+
+	if(!activate() && !ignore_chk)
+	{
+		fprintf(stderr, "RST set, but CHK is low\n");
+		return 1;
+	}
+	
+	if(!strcmp(poptPeekArg(pc), "reset"))
+	{ 
+		print_usage = 0;
+		deactivate(); 
+		if(verbose) fprintf(stderr, "Microcontroller has been reset.\n");
+	} else if(!strcmp(poptPeekArg(pc), "erase"))
+	{
+		print_usage = 0;
+		programming();
+		erase();
+		if(verbose) fprintf(stderr, "Microcontroller memory has been erased.\n");
+	} else if(!strcmp(poptPeekArg(pc), "lock"))
+	{
+		int lock_level;
+		poptGetArg(pc);
+		lock_level = atoi(poptGetArg(pc));
+		print_usage = 0;
+		programming();
+		lock(lock_level);
+		
+		if(verbose) fprintf(stderr, "Locked at level %d\n", lock_level);
+	} else if(!strcmp(poptPeekArg(pc), "writefile"))
+	{
+		poptGetArg(pc);
+		programming();
+		while(poptPeekArg(pc)) {
+			int firstchar;
+			const char *filename = poptGetArg(pc);
+			
+			if(!strcmp(filename, "-")) fd = stdin;
+			else { 
+				fd = fopen(filename, "r");
+				if(!fd) {
+					fprintf(stderr, "Unable to open file %s, ignoring.\n", filename);
+					continue;
+				}
+			}
+
+			firstchar = getc(fd);
+			ungetc(firstchar, fd);
+
+			if(!strcmp(format, "hex") || (!strcmp(format, "auto") && firstchar == ':'))writehex(fd, do_verify, datamem);
+			else if(!strcmp(format, "auto") || !strcmp(format, "bin"))writebin(fd, do_verify, datamem);
+			else fprintf(stderr, "Unknown format %s, ignoring file\n", format);
+
+			fprintf(stderr, "File %s programmed correctly\n", filename);
+			fclose(fd);
+		}
+	} else if(!strcmp(poptPeekArg(pc), "readfile")) {
+		int len, i;
+		programming();
+		poptGetArg(pc);
+
+		if(!poptPeekArg(pc)) {
+			fprintf(stderr, "readfile needs at least one argument (number of bytes to read\n");
+			deactivate();
+			return 1;
+		}
+
+		len = atol(poptGetArg(pc));
+		
+		if(!poptPeekArg(pc)) fd = stdout;
+		else {
+			fd = fopen(poptGetArg(pc), "w+");
+			if(!fd) {
+				perror("fopen");
+				deactivate();
+				return 1;
+			}
+		}
+
+		if(!strcmp(format, "bin"))fprintf(stderr, "Warning: writing in binary mode\n");
+
+		for(i = 0; i < len; i++) {
+			if(datamem)fputc(readdata(i), fd);
+			else fputc(readcode(i), fd);
+			fputc('.', stderr);
+		}
+
+		fputc('\n', stderr);
+			
+		if(verbose)fprintf(stderr, "%d bytes read\n", len);
+		fclose(fd);
+	} else if(!strcmp(poptPeekArg(pc), "writebyte")) {
+		int address, byte;
+		poptGetArg(pc);
+		programming();
+		if(!poptPeekArg(pc)) {
+			fprintf(stderr, "writebyte requires 2 arguments\n");
+			deactivate();
+			return 1;
+		}
+		address = strtol(poptGetArg(pc), NULL, 16);
+
+		if(!poptPeekArg(pc)) {
+			fprintf(stderr, "writebyte requires 2 arguments\n");
+			deactivate();
+			return 1;
+		}
+		byte = strtol(poptGetArg(pc), NULL, 16);
+
+		writechar(datamem, do_verify, address, byte);
+		if(verbose)fprintf(stderr, "%x written to %x\n", byte, address);
+	} else if(!strcmp(poptPeekArg(pc), "readbyte")) {
+		int address;
+		poptGetArg(pc);
+		programming();
+		if(!poptPeekArg(pc)) {
+			fprintf(stderr, "writebyte requires 2 arguments\n");
+			deactivate();
+			return 1;
+		}
+		address = strtol(poptGetArg(pc), NULL, 16);
+
+		if(datamem) printf("%x\n", readdata(address));
+		else printf("%x\n", readcode(address));
+	} else if(!strcmp(poptPeekArg(pc), "version")) {
+		  fprintf(stderr, "at89prog - a AT89S8252 programmer over the serial port\n");
+		  fprintf(stderr, " Version "VERSION"\n");
+		  fprintf(stderr, " (C) 2003 Jelmer Vernooij <jelmer@samba.org>\n");
+		  fprintf(stderr, "  Published under the GNU GPL\n");
+		  return 0;
+	} else {
+		fprintf(stderr, "Unknown command %s\n", poptGetArg(pc));
+		usage(pc);
+	}
+
+	deactivate();
+	poptFreeContext(pc);
+	
+	return 0;
+}
