@@ -1,3 +1,22 @@
+/* 
+	at89prog
+	(c) 2003-2004 Jelmer Vernooij <jelmer@samba.org>
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include <gtk/gtk.h>
 
 #include <sys/types.h>
@@ -43,18 +62,14 @@ void save_hex_file(const char *file)
 	fclose(fd);
 }
 
-void
-on_new_activate                       (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_new_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	if(buffer)g_free(buffer);
 	bufferlen = 0; buffer = NULL;
 	update_hex_field();
 }
 
-void
-on_open_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_open_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	GtkWidget *ok_button;
 	GtkWidget *cancel_button;
@@ -83,9 +98,7 @@ on_open_activate                      (GtkMenuItem     *menuitem,
 }
 
 
-void
-on_save_as_activate                   (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_save_as_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	GtkWidget *ok_button;
 	GtkWidget *cancel_button;
@@ -114,17 +127,13 @@ on_save_as_activate                   (GtkMenuItem     *menuitem,
 }
 
 
-void
-on_quit_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_quit_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	gtk_main_quit();
 }
 
 
-void
-on_settings_activate                  (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_settings_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	guint result;
 	GtkWidget *settingswin = create_settingswin();
@@ -179,9 +188,7 @@ void on_upload_code_memory_activate (GtkMenuItem *menuitem, gpointer user_data)
 }
 
 
-void
-on_about_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
+void on_about_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	GtkWidget *aboutwin = create_aboutwin();
     gtk_dialog_run(GTK_DIALOG(aboutwin));
