@@ -60,7 +60,7 @@ void erase()
 	SPI_Out(0xAC); /* 1010 1100 */
 	SPI_Out(0x04); /* xxxx x100 (x = don't care) */
 	SPI_Out(0x00); /* xxxx xxxx (don't care) */
-	waitmillisec(9);
+	waitmillisec(16);
 }
 
 
