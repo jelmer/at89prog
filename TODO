@@ -1,2 +1,3 @@
 - gui frontend
-- different backends: parallel, serial
+- fix the serial backend
+- add parallel backend
