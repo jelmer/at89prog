@@ -27,7 +27,7 @@ static int ser_init(char *location)
 {
 	fd = open(location?location:"/dev/ttyS0", O_RDWR | O_NOCTTY);
 	if(fd < 0) {
-		perror("open");
+		perror("Error opening serial port");
 		return -1;
 	}
 

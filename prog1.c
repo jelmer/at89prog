@@ -198,10 +198,16 @@ int main(int argc, const char **argv)
 
 	poptContext pc;
 
-	pc = poptGetContext(NULL, argc, argv, long_options, POPT_CONTEXT_KEEP_FIRST);
+	pc = poptGetContext(NULL, argc, argv, long_options, 0);
 	poptSetOtherOptionHelp(pc, "command [file-to-write]");
 
 	while ((c = poptGetNextOpt(pc)) != -1) { }
+
+	if(!poptPeekArg(pc)) 
+	{
+		usage(pc);
+		return 0;
+	}
 
 	if(!rcfile) { 
 		rcfile = malloc(strlen(getenv("HOME")) + 20);
@@ -218,14 +224,6 @@ int main(int argc, const char **argv)
 
 	signal(SIGINT, quit);
 	signal(SIGSEGV, quit);
-
-	poptGetArg(pc); /* drop argv[0] */
-
-	if(!poptPeekArg(pc)) 
-	{
-		usage(pc);
-		return 0;
-	}
 
 	if(!activate() && !ignore_chk)
 	{
