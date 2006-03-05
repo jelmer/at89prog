@@ -1,9 +1,9 @@
 Source: at89prog
 Section: electronics
 Priority: optional
-Maintainer: Jelmer Vernooij <jelmer@aurelia.vernstok.nl>
+Maintainer: Jelmer Vernooij <jelmer@vernstok.nl>
 Standards-Version: 3.5.8
-Build-Depends: debmake
+Build-Depends: debmake, libglib2.0-dev
 
 Package: at89prog
 Architecture: any

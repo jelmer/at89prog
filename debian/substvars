@@ -1,1 +1,1 @@
-shlibs:Depends=libc6 (>= 2.3.2-1), libpopt0 (>= 1.7)
+shlibs:Depends=libc6 (>= 2.3.5-1), libpopt0 (>= 1.7)
