@@ -22,12 +22,14 @@ configure: configure.ac
 	autoreconf
 
 install: all doc
-	mkdir -p $(DESTDIR)/usr/bin
-	cp at89prog $(DESTDIR)/usr/bin
-	mkdir -p $(DESTDIR)/usr/share/man/man1
-	cp at89prog.1 $(DESTDIR)/usr/share/man/man1
-	mkdir -p $(DESTDIR)/usr/share/doc/at89prog
-	cp at89progrc.example TODO COPYING AUTHORS at89prog.pdf $(DESTDIR)/usr/share/doc/at89prog
+	mkdir -p $(DESTDIR)$(bindir)
+	cp at89prog $(DESTDIR)$(bindir)
+	mkdir -p $(DESTDIR)$(mandir)/man1
+	cp at89prog.1 $(DESTDIR)$(mandir)/man1
+	mkdir -p $(DESTDIR)$(mandir)/man5
+	cp at89progrc.5 $(DESTDIR)$(mandir)/man5
+	mkdir -p $(DESTDIR)$(docdir)
+	cp at89progrc.example TODO COPYING AUTHORS at89prog.pdf $(DESTDIR)$(docdir)
 
 at89prog.pdf: at89prog.tex
 	pdflatex $<

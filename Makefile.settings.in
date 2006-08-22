@@ -1,3 +1,9 @@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
+datarootdir = @datarootdir@
+prefix = @prefix@
+bindir = @bindir@
+mandir = @mandir@
+docdir = @docdir@
 LIBS = -lpopt 
 CFLAGS = @CFLAGS@
 GTK_LIBS = @GTK_LIBS@
