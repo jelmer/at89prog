@@ -1,0 +1,5 @@
+LIBS = -lpopt 
+CFLAGS = @CFLAGS@
+GTK_LIBS = @GTK_LIBS@
+GTK_CFLAGS = @GTK_CFLAGS@
+CC = @CC@

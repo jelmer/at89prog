@@ -1,3 +1,13 @@
 at89prog
 at89prog-gtk
 debian/tmp
+aclocal.m4
+autom4te.cache
+config.status
+config.log
+configure
+Makefile.settings
+at89prog.aux
+at89prog.log
+at89prog.pdf
+at89prog.toc
