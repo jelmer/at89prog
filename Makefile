@@ -1,6 +1,14 @@
 include Makefile.settings
 
 COMMON_OBJ = at89ser.o pins.o pins-serial.o pins-serial-raw.o delays.o pins-parallel.o hexfile.o
+FTDI_OBJ = pins-ftdi.o
+
+ifeq ($(HAVE_FTDI),1)
+LIBS += $(FTDI_LIBS)
+CFLAGS += $(FTDI_CFLAGS)
+COMMON_OBJ += $(FTDI_OBJ)
+endif 
+
 PROG_OBJ = at89prog.o $(COMMON_OBJ)
 GTKPROG_OBJ = at89prog-gtk.o $(COMMON_OBJ)
 
@@ -32,7 +40,7 @@ at89prog-gtk: $(GTKPROG_OBJ)
 	$(CC) $(DEBUG) -Wall -O -o $@ $(GTKPROG_OBJ) $(LIBS) $(GTK_LIBS)
 
 %.o: %.c
-	$(CC) $(GTK_CFLAGS) $(DEBUG) -Wall -O -c $< -o $@
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) $(DEBUG) -Wall -O -c $< -o $@
 
 clean: 
 	rm -f at89prog *.o core at89prog.aux at89prog.log at89prog.toc at89prog.pdf at89prog-gtk
