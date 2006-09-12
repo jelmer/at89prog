@@ -81,9 +81,11 @@ void writechar(char datamem, char do_verify, int address, int byte)
 int writebin(FILE *fd, char do_verify, char datamem)
 {
 	int i = 0;
-	while(!feof(fd)) 
+	int byte;
+	
+	while((byte = fgetc(fd)) != -1) 
 	{
-		writechar(datamem, do_verify, i, fgetc(fd));
+		writechar(datamem, do_verify, i, byte);
 		i++;
 	}
 	if(progress)fputc('\n', stderr);
