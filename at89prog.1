@@ -1,7 +1,7 @@
-.TH AT89PROG 1 "24 February 2004"
+.TH AT89PROG 1 "22 August 2006"
 .SH NAME
 at89prog \- command-line utility for programming the AT89S8252 processor 
-over the serial port
+over the serial port/USB
 .SH SYNOPSIS
 \fBat89prog\fP [\fIflags\fP] command [arguments]
 
@@ -90,7 +90,7 @@ serial.
 Read from the specified rcfile instead of from the \fB.at89progrc\fP file 
 in the users' home directory.
 .TP
-\fI-t, --type=serial|serial-raw|parallel\fP
+\fI-t, --type=serial|serial-raw|parallel|ftdi\fP
 Driver to use. \fBserial\fP uses the standard serial port functionality. 
 \fBserial-raw\fP and \fBparallel\fP talk directly to the hardware and therefor requires root privileges. 
 Only use serial-raw if you have a buggy serial port driver.
@@ -111,3 +111,5 @@ the write was successful.
 .SH THANKS
 Thanks to Hans Tjeerdsma for his help with debugging the output functions and 
 and for his help with the research.
+.PP
+Thanks to Stefan Lievens for adding support for FTDI.

@@ -33,22 +33,27 @@
 #define PIN_CHK  3
 #define PIN_MISO 4
 
-char *location = NULL;
-char *pin_names[] = { "MOSI", "SCK", "RST", "CHK", "MISO", NULL };
-int pin_mapping[5] = { -1, -1, -1, -1, -1 };
-int pin_reverse[5] = { 0, 0, 0, 0, 0 };
+
 
 #define MAXLEN 100
 #define MAXSETTINGS 100
 
 static struct pins_backend *backend = NULL;
-extern struct pins_backend serial_raw, serial, parallel;
+extern struct pins_backend serial_raw, serial, parallel, ftdi;
 static struct pins_backend *pins_backends[] = {
 	&serial,
 	&serial_raw,
 	&parallel,
+#ifdef HAVE_FTDI
+	&ftdi,
+#endif
 	NULL
 };
+
+char *location = NULL;
+char *pin_names[] = { "MOSI", "SCK", "RST", "CHK", "MISO", NULL };
+int pin_mapping[5] = { -1, -1, -1, -1, -1 };
+int pin_reverse[5] = { 0, 0, 0, 0, 0 };
 
 static struct confsetting {
 	char name[MAXLEN];
@@ -127,6 +132,8 @@ int pins_set_backend(char *name)
 	return -1;
 }
 
+
+
 int pins_set_location(char *loc)
 {
 	location = strdup(loc);
@@ -145,7 +152,7 @@ int SetPinVariable(char *name, char *value)
 
 	if(name[0] == '!') {
 		reverse = 1; 
-		i = get_pin_id(name); 
+		i = get_pin_id(&name[1]); 
 	} else {
 		i = get_pin_id(name);
 	}

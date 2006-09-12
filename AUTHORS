@@ -1,3 +1,5 @@
 Jelmer Vernooij <jelmer@samba.org>
 
+FTDI support by Stefan Lievens <zatalian@gmail.com>
+
 Thanks to Hans Tjeerdsma for all the help with the debugging and research.

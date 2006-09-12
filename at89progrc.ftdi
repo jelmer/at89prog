@@ -1,0 +1,7 @@
+type ftdi
+port /dev/ttyUSB0
+!MOSI P4
+MISO P3
+RST P2
+CHK P2
+SCK P0

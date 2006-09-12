@@ -1,0 +1,7 @@
+type serial
+port /dev/ttyUSB0
+MOSI DTR
+MISO CTS
+!RST RTS
+!CHK RTS
+!SCK TXD
