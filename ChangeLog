@@ -1,4 +1,5 @@
 0.9:
+ * Fix support for uploading binary files.
  * Add support for FTDI chips.
  * Use autoconf.
 

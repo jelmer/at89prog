@@ -29,7 +29,7 @@ struct pins_backend {
 	int (*close) ();
 };
 
-int pins_read_config_file(char *);
+int pins_read_config_file(const char *);
 int pins_set_backend(char *);
 int pins_set_location(char *);
 int pins_init();

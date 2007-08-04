@@ -80,7 +80,7 @@ int backend_get_pin_id(char *name)
 	return -1;
 }
 
-int pins_read_config_file(char *name) 
+int pins_read_config_file(const char *name) 
 {
 	char bit[10], pin[10];
 	int line = 0;
