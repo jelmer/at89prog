@@ -82,7 +82,7 @@ int backend_get_pin_id(char *name)
 
 int pins_read_config_file(const char *name) 
 {
-	char bit[10], pin[10];
+	char bit[16], pin[16];
 	int line = 0;
 	FILE *fd = fopen(name, "r");
 
@@ -96,7 +96,7 @@ int pins_read_config_file(const char *name)
 	while(!feof(fd)) 
 	{
 		line++;
-		if(fscanf(fd, "%100s %100s\n", bit, pin) < 2) {
+		if(fscanf(fd, "%15s %15s\n", bit, pin) < 2) {
 			fprintf(stderr, "Invalid line %d in %s, ignoring\n", line, name);
 			continue;
 		}
