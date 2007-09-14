@@ -94,7 +94,7 @@ int writebin(FILE *fd, char do_verify, char datamem)
 
 int writehex(FILE *fd, char do_verify, char datamem)
 {
-	int length; 
+	size_t length; 
 	void *data;
 	long address;
 	int i = 0, j = 0;
